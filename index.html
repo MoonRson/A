@@ -882,15 +882,31 @@
             updateClock(); // 立即更新一次
 
             // ============================================================
-            // 四、点击涟漪动画
+            // 四、背景音乐（新增）
+            // ============================================================
+            const audio = new Audio('music.mp3');
+            audio.loop = true;   // 循环播放
+            let isMusicPlaying = false;
+
+            // ============================================================
+            // 五、点击涟漪动画 + 触发音乐播放（原有逻辑扩展）
             // ============================================================
             window.addEventListener('click', function(e) {
+                // 如果音乐还没播放，则开始播放（用户首次点击）
+                if (!isMusicPlaying) {
+                    audio.play().catch(() => {}); // 忽略可能的小错误
+                    isMusicPlaying = true;
+                }
                 createRipple(e.clientX, e.clientY);
             });
 
             // 移动端触摸支持
             window.addEventListener('touchstart', function(e) {
                 if (e.touches.length > 0) {
+                    if (!isMusicPlaying) {
+                        audio.play().catch(() => {});
+                        isMusicPlaying = true;
+                    }
                     createRipple(e.touches[0].clientX, e.touches[0].clientY);
                 }
             }, { passive: true });
@@ -914,7 +930,7 @@
             }
 
             // ============================================================
-            // 五、主导 requestAnimationFrame 循环
+            // 六、主导 requestAnimationFrame 循环
             // ============================================================
             function mainLoop(timestamp) {
                 // Canvas 背景动画
@@ -926,7 +942,7 @@
             }
 
             // ============================================================
-            // 六、初始化所有内容
+            // 七、初始化所有内容
             // ============================================================
             function init() {
                 resizeCanvas();
@@ -939,7 +955,7 @@
             init();
 
             // ============================================================
-            // 七、页面可见性处理（切换标签页时保持流畅）
+            // 八、页面可见性处理（切换标签页时保持流畅）
             // ============================================================
             document.addEventListener('visibilitychange', function() {
                 // 当页面重新可见时，重置时间基准以避免跳帧
