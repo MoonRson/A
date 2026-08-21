@@ -13,27 +13,16 @@
                全局基础样式
                ============================================================ */
         :root {
-            /* 暖白色纸面基调 */
             --bg-color: #FAF6F0;
-            /* 墨迹灰褐色（Canvas 使用） */
             --ink-color: 139, 125, 107;
-            /* 文字主色：深暖灰 */
             --text-primary: #3D3629;
-            /* 竖线装饰色：浅灰褐 */
             --line-decoration: #C5B8A5;
-            /* 时钟颜色 */
             --text-secondary: #8B7D6B;
-            /* 社交链接颜色 */
             --text-tertiary: #A89888;
-            /* 涟漪暖灰 */
             --ripple-color: 190, 170, 150;
-            /* 字体 */
             --font-serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
-            /* Slogan 字号（响应式） */
             --slogan-size: clamp(1.3rem, 3.2vw, 2rem);
-            /* 时钟字号 */
             --clock-size: clamp(0.9rem, 2vw, 1.15rem);
-            /* 社交链接字号 */
             --social-size: clamp(1rem, 2.2vw, 1.3rem);
         }
 
@@ -50,7 +39,6 @@
             overflow: hidden;
             font-family: var(--font-serif);
             background-color: var(--bg-color);
-            /* 柔和的纸张渐变，增加温暖层次 */
             background-image:
                 radial-gradient(ellipse at 20% 30%, rgba(255, 250, 240, 0.6) 0%, transparent 60%),
                 radial-gradient(ellipse at 80% 70%, rgba(245, 238, 228, 0.5) 0%, transparent 55%),
@@ -61,9 +49,6 @@
             cursor: default;
         }
 
-        /* ============================================================
-           Canvas 背景层（墨迹 + 尘埃粒子）
-           ============================================================ */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -72,12 +57,8 @@
             height: 100%;
             z-index: 1;
             pointer-events: none;
-            /* 让鼠标事件穿透到内容层，但我们需要在 JS 中监听 window 的鼠标移动 */;
         }
 
-        /* ============================================================
-           纸纹噪点覆盖层（CSS SVG 噪点，极淡）
-           ============================================================ */
         .noise-overlay {
             position: fixed;
             top: 0;
@@ -87,15 +68,11 @@
             z-index: 2;
             pointer-events: none;
             opacity: 0.035;
-            /* 极淡的纸纹噪点 */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
             background-repeat: repeat;
             background-size: 200px 200px;
         }
 
-        /* ============================================================
-           主内容层
-           ============================================================ */
         .content {
             position: relative;
             z-index: 3;
@@ -106,19 +83,15 @@
             height: 100%;
             padding: 0 24px;
             pointer-events: none;
-            /* 让点击穿透到 window 监听 */;
         }
 
-        /* Slogan 容器：竖线 + 文字，整体居中 */
         .slogan-container {
             display: flex;
             align-items: stretch;
             justify-content: center;
             pointer-events: auto;
-            /* 允许选择文字（如果需要） */;
         }
 
-        /* 左侧竖线装饰 —— 像书页批注 */
         .slogan-line-decoration {
             flex-shrink: 0;
             width: 2px;
@@ -131,33 +104,26 @@
             border-radius: 1px;
             margin-right: clamp(16px, 3vw, 32px);
             opacity: 0.75;
-            /* 轻微淡雅 */;
         }
 
-        /* Slogan 文字块：左对齐 */
         .slogan-text {
             display: flex;
             flex-direction: column;
             justify-content: center;
             text-align: left;
-            /* 左对齐 */;
         }
 
-        /* 每一行 Slogan */
         .slogan-line {
             font-size: var(--slogan-size);
             font-weight: 400;
             color: var(--text-primary);
             line-height: 1.75;
             letter-spacing: 0.06em;
-            /* 微字距，书卷气 */
             white-space: nowrap;
             min-height: 1.75em;
-            /* 保持行高稳定，避免光标跳动 */
             transition: color 0.4s ease;
         }
 
-        /* 打字机光标样式 */
         .slogan-line .cursor {
             display: inline-block;
             width: 2px;
@@ -171,27 +137,16 @@
             transition: opacity 0.2s ease;
         }
 
-        /* 光标隐藏状态 */
         .slogan-line .cursor.hidden {
             opacity: 0;
             animation: none;
         }
 
-        /* 光标闪烁动画 */
         @keyframes cursor-blink {
-            0%,
-            50% {
-                opacity: 1;
-            }
-            51%,
-            100% {
-                opacity: 0;
-            }
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
-        /* ============================================================
-           时钟样式
-           ============================================================ */
         .clock {
             margin-top: clamp(28px, 5vh, 48px);
             font-size: var(--clock-size);
@@ -203,9 +158,6 @@
             transition: color 0.4s ease;
         }
 
-        /* ============================================================
-           社交链接样式
-           ============================================================ */
         .social-links {
             margin-top: clamp(20px, 4vh, 36px);
             display: flex;
@@ -214,10 +166,8 @@
             align-items: center;
             pointer-events: auto;
             flex-wrap: wrap;
-            /* 移动端可换行 */;
         }
 
-        /* 单个社交链接 */
         .social-link {
             position: relative;
             display: inline-flex;
@@ -230,15 +180,16 @@
             transition: color 0.3s ease, transform 0.3s ease;
             -webkit-tap-highlight-color: transparent;
             padding: 4px;
+            background: none;
+            border: none;
+            font-family: inherit;
         }
 
-        /* 悬停时图标轻微上浮、颜色加深 */
         .social-link:hover {
             color: var(--text-primary);
             transform: translateY(-2px);
         }
 
-        /* Tooltip 文字标签（悬停时显示） */
         .social-link::after {
             content: attr(data-label);
             position: absolute;
@@ -262,15 +213,11 @@
             -webkit-backdrop-filter: blur(4px);
         }
 
-        /* 悬停时显示 tooltip */
         .social-link:hover::after {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
 
-        /* ============================================================
-           点击涟漪动画层
-           ============================================================ */
         .ripple {
             position: fixed;
             width: 0;
@@ -283,7 +230,6 @@
             animation: ripple-expand 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
         }
 
-        /* 涟漪扩散动画：从点击点向外扩大并淡出 */
         @keyframes ripple-expand {
             0% {
                 width: 0;
@@ -305,14 +251,12 @@
                 padding: 0 16px;
             }
 
-            /* 移动端竖线稍短、间距稍窄 */
             .slogan-line-decoration {
                 margin-right: 14px;
                 width: 1.5px;
                 opacity: 0.65;
             }
 
-            /* 移动端 Slogan 字号稍小 */
             .slogan-line {
                 font-size: clamp(1.05rem, 4.5vw, 1.4rem);
                 line-height: 1.7;
@@ -320,14 +264,12 @@
                 min-height: 1.7em;
             }
 
-            /* 移动端时钟 */
             .clock {
                 font-size: clamp(0.8rem, 3vw, 1rem);
                 letter-spacing: 0.1em;
                 margin-top: 22px;
             }
 
-            /* 移动端社交链接间距稍小 */
             .social-links {
                 gap: 14px;
                 margin-top: 18px;
@@ -337,16 +279,11 @@
                 font-size: clamp(0.95rem, 3.5vw, 1.15rem);
             }
 
-            /* 移动端 tooltip 始终显示（无悬停） */
+            /* 移动端：彻底隐藏文字标签，只显示图标 */
             .social-link::after {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-                bottom: calc(100% + 6px);
-                font-size: 0.55rem;
-                padding: 3px 8px;
+                display: none;
             }
 
-            /* 涟漪在移动端稍小 */
             @keyframes ripple-expand {
                 0% {
                     width: 0;
@@ -361,19 +298,16 @@
             }
         }
 
-        /* 极小屏幕进一步调整 */
         @media (max-width: 380px) {
             .slogan-line {
                 font-size: 0.95rem;
                 letter-spacing: 0.03em;
             }
-
             .social-links {
                 gap: 10px;
             }
         }
 
-        /* 暗色模式友好提示（如果需要，可忽略） */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #F5F0E8;
@@ -384,23 +318,12 @@
 </head>
 <body>
 
-    <!-- ============================================================
-    Canvas 背景：墨迹 + 尘埃粒子
-    ============================================================ -->
     <canvas id="bg-canvas"></canvas>
-
-    <!-- 纸纹噪点覆盖层（CSS） -->
     <div class="noise-overlay" aria-hidden="true"></div>
 
-    <!-- ============================================================
-    主内容层
-    ============================================================ -->
     <div class="content" id="content">
-        <!-- Slogan 容器（竖线 + 三行文字） -->
         <div class="slogan-container">
-            <!-- 左侧竖线装饰 -->
             <div class="slogan-line-decoration" aria-hidden="true"></div>
-            <!-- 三行 Slogan 文字 -->
             <div class="slogan-text" id="slogan-text">
                 <div class="slogan-line" id="slogan-line-0">
                     <span class="typed-text" id="typed-0"></span><span class="cursor hidden" id="cursor-0"></span>
@@ -414,71 +337,53 @@
             </div>
         </div>
 
-        <!-- 实时时钟 -->
         <div class="clock" id="clock">00:00:00 · 星期日</div>
 
-        <!-- 社交链接 -->
         <div class="social-links">
             <a href="https://github.com/" target="_blank" rel="noopener noreferrer"
-            class="social-link" data-label="GitHub" aria-label="GitHub">🌱</a>
+               class="social-link" data-label="GitHub" aria-label="GitHub">🌱</a>
             <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer"
-            class="social-link" data-label="Twitter" aria-label="Twitter">🕊️</a>
-            <a href="#" class="social-link" data-label="WeChat" aria-label="WeChat">📄</a>
+               class="social-link" data-label="Twitter" aria-label="Twitter">🕊️</a>
+            <!-- 微信链接已改为微信官网 -->
+            <a href="https://weixin.qq.com/" target="_blank" rel="noopener noreferrer"
+               class="social-link" data-label="WeChat" aria-label="WeChat">💬</a>
             <a href="mailto:hello@example.com" class="social-link" data-label="Email" aria-label="Email">✉️</a>
+            <button class="social-link" id="music-toggle" data-label="音乐" aria-label="播放或暂停背景音乐">🎵</button>
         </div>
     </div>
 
-    <!-- ============================================================
-    JavaScript：所有交互逻辑
-    ============================================================ -->
     <script>
         (function() {
             'use strict';
 
             // ============================================================
-            // 一、Canvas 背景：墨迹与尘埃粒子
+            // 一、Canvas 背景
             // ============================================================
             const canvas = document.getElementById('bg-canvas');
             const ctx = canvas.getContext('2d');
 
-            // 画布尺寸
             let canvasWidth = window.innerWidth;
             let canvasHeight = window.innerHeight;
 
-            // 鼠标位置（用于尘埃粒子吸引）
             const mouse = { x: -9999, y: -9999 };
 
-            // ---------- 墨迹数据 ----------
-            // 墨迹基础色（灰褐色 RGB）
             const INK_RGB = { r: 139, g: 125, b: 107 };
-
-            // 墨迹团数量
             const INK_COUNT = 10;
-
-            // 存储墨迹团
             const inkBlots = [];
 
-            // 初始化墨迹
             function initInkBlots() {
                 inkBlots.length = 0;
                 for (let i = 0; i < INK_COUNT; i++) {
-                    // 随机位置（略微避开边缘，让墨迹有空间晕染）
                     const margin = 80;
                     const x = margin + Math.random() * (canvasWidth - margin * 2);
                     const y = margin + Math.random() * (canvasHeight - margin * 2);
-                    // 主半径 80~200px
                     const radius = 80 + Math.random() * 120;
-                    // 基础透明度 0.01~0.07（极淡）
                     const baseAlpha = 0.01 + Math.random() * 0.06;
-                    // 漂移速度（非常缓慢，弧度/秒）
                     const driftSpeed = 0.05 + Math.random() * 0.1;
-                    // 漂移幅度（像素）
                     const driftRange = 20 + Math.random() * 40;
-                    // 随机相位
                     const phase = Math.random() * Math.PI * 2;
-                    // 卫星墨迹偏移参数（用于模拟不规则晕染）
                     const satelliteOffsets = [];
-                    const satelliteCount = 2 + Math.floor(Math.random() * 2); // 2~3 个卫星
+                    const satelliteCount = 2 + Math.floor(Math.random() * 2);
                     for (let s = 0; s < satelliteCount; s++) {
                         satelliteOffsets.push({
                             dx: (Math.random() - 0.5) * radius * 0.8,
@@ -496,32 +401,25 @@
                         driftRange: driftRange,
                         phase: phase,
                         satellites: satelliteOffsets,
-                        // 用于透明度微小波动的参数
                         alphaPulseSpeed: 0.15 + Math.random() * 0.25,
                         alphaPulseRange: 0.004 + Math.random() * 0.008
                     });
                 }
             }
 
-            // ---------- 尘埃粒子数据 ----------
             const DUST_COUNT = 40;
             const dustParticles = [];
 
-            // 初始化尘埃粒子
             function initDustParticles() {
                 dustParticles.length = 0;
                 for (let i = 0; i < DUST_COUNT; i++) {
                     dustParticles.push({
                         x: Math.random() * canvasWidth,
                         y: Math.random() * canvasHeight,
-                        // 速度非常小（像素/帧）
                         vx: (Math.random() - 0.5) * 0.3,
                         vy: (Math.random() - 0.5) * 0.3,
-                        // 粒子半径 1~3px
                         radius: 1 + Math.random() * 2,
-                        // 透明度 0.03~0.15
                         alpha: 0.03 + Math.random() * 0.12,
-                        // 浮动相位（用于正弦波扰动）
                         floatPhase: Math.random() * Math.PI * 2,
                         floatSpeed: 0.2 + Math.random() * 0.5,
                         floatAmplitude: 0.15 + Math.random() * 0.35
@@ -529,33 +427,27 @@
                 }
             }
 
-            // 调整画布尺寸
             function resizeCanvas() {
                 canvasWidth = window.innerWidth;
                 canvasHeight = window.innerHeight;
                 canvas.width = canvasWidth;
                 canvas.height = canvasHeight;
-                // 重新初始化墨迹和粒子以适应新尺寸
                 initInkBlots();
                 initDustParticles();
             }
 
-            // 监听窗口大小变化
             window.addEventListener('resize', resizeCanvas);
 
-            // 监听鼠标移动（用于尘埃粒子吸引）
             window.addEventListener('mousemove', function(e) {
                 mouse.x = e.clientX;
                 mouse.y = e.clientY;
             });
 
-            // 鼠标离开窗口时，将鼠标位置移出画布
             window.addEventListener('mouseleave', function() {
                 mouse.x = -9999;
                 mouse.y = -9999;
             });
 
-            // 移动端触摸支持
             window.addEventListener('touchmove', function(e) {
                 if (e.touches.length > 0) {
                     mouse.x = e.touches[0].clientX;
@@ -568,19 +460,14 @@
                 mouse.y = -9999;
             });
 
-            // ---------- 绘制单个墨迹团 ----------
             function drawInkBlot(blot, time) {
-                // 使用正弦波计算当前漂移位置
                 const dx = Math.sin(time * blot.driftSpeed + blot.phase) * blot.driftRange;
                 const dy = Math.cos(time * blot.driftSpeed * 0.7 + blot.phase * 1.3) * blot.driftRange;
                 const cx = blot.initialX + dx;
                 const cy = blot.initialY + dy;
-
-                // 透明度微小波动
                 const alphaPulse = Math.sin(time * blot.alphaPulseSpeed + blot.phase) * blot.alphaPulseRange;
                 const currentAlpha = Math.max(0.005, Math.min(0.09, blot.baseAlpha + alphaPulse));
 
-                // 绘制主墨迹（径向渐变）
                 const mainGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, blot.radius);
                 mainGradient.addColorStop(0, `rgba(${INK_RGB.r}, ${INK_RGB.g}, ${INK_RGB.b}, ${currentAlpha})`);
                 mainGradient.addColorStop(0.55, `rgba(${INK_RGB.r}, ${INK_RGB.g}, ${INK_RGB.b}, ${currentAlpha * 0.5})`);
@@ -590,7 +477,6 @@
                 ctx.arc(cx, cy, blot.radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 绘制卫星墨迹（模拟不规则晕染）
                 for (const sat of blot.satellites) {
                     const satX = cx + sat.dx;
                     const satY = cy + sat.dy;
@@ -607,14 +493,11 @@
                 }
             }
 
-            // ---------- 更新与绘制尘埃粒子 ----------
             function updateAndDrawDustParticles(time) {
                 for (const p of dustParticles) {
-                    // 使用正弦波添加微小的浮动扰动
                     const floatX = Math.sin(time * p.floatSpeed + p.floatPhase) * p.floatAmplitude;
                     const floatY = Math.cos(time * p.floatSpeed * 0.8 + p.floatPhase * 1.2) * p.floatAmplitude;
 
-                    // 鼠标吸引（非常轻微）
                     const mouseDx = mouse.x - p.x;
                     const mouseDy = mouse.y - p.y;
                     const mouseDist = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
@@ -624,21 +507,16 @@
                         p.vy += (mouseDy / mouseDist) * force;
                     }
 
-                    // 更新位置
                     p.x += p.vx + floatX;
                     p.y += p.vy + floatY;
-
-                    // 速度阻尼（防止累积）
                     p.vx *= 0.995;
                     p.vy *= 0.995;
 
-                    // 边界反弹
                     if (p.x < -10) p.x = canvasWidth + 10;
                     if (p.x > canvasWidth + 10) p.x = -10;
                     if (p.y < -10) p.y = canvasHeight + 10;
                     if (p.y > canvasHeight + 10) p.y = -10;
 
-                    // 绘制尘埃粒子（微小光点，带柔和边缘）
                     const dustGradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3);
                     dustGradient.addColorStop(0, `rgba(${INK_RGB.r}, ${INK_RGB.g}, ${INK_RGB.b}, ${p.alpha})`);
                     dustGradient.addColorStop(0.5, `rgba(${INK_RGB.r}, ${INK_RGB.g}, ${INK_RGB.b}, ${p.alpha * 0.3})`);
@@ -650,27 +528,18 @@
                 }
             }
 
-            // ---------- Canvas 动画循环 ----------
             function animateCanvas(timestamp) {
-                const time = timestamp / 1000; // 转换为秒
-
-                // 清空画布（透明背景，CSS 背景色透出）
+                const time = timestamp / 1000;
                 ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-                // 绘制所有墨迹
                 for (const blot of inkBlots) {
                     drawInkBlot(blot, time);
                 }
-
-                // 更新并绘制尘埃粒子
                 updateAndDrawDustParticles(time);
-
-                // 继续动画循环
                 requestAnimationFrame(animateCanvas);
             }
 
             // ============================================================
-            // 二、Slogan 打字机效果（逐行逐字打印 → 停顿 → 逐字删除 → 循环）
+            // 二、Slogan 打字机效果
             // ============================================================
             const sloganLines = [
                 '在长期主义之路上，',
@@ -678,7 +547,6 @@
                 '做时间的朋友。'
             ];
 
-            // 每行对应的 DOM 元素
             const typedElements = [
                 document.getElementById('typed-0'),
                 document.getElementById('typed-1'),
@@ -690,10 +558,8 @@
                 document.getElementById('cursor-2')
             ];
 
-            // 每行已显示的字符数
             let charCount = [0, 0, 0];
 
-            // 打字机状态
             const STATE = {
                 TYPING_LINE_0: 'typing_line_0',
                 PAUSE_AFTER_LINE_0: 'pause_after_line_0',
@@ -706,31 +572,25 @@
             };
 
             let currentState = STATE.TYPING_LINE_0;
-            // 当前正在打字的行索引（0,1,2）
             let currentTypingLine = 0;
-            // 当前正在删除的行索引（从2开始向前删）
             let currentDeletingLine = 2;
 
-            // 时间参数（毫秒）
-            const TYPE_SPEED = 130; // 打字速度：每字符 130ms
-            const LINE_PAUSE_DURATION = 550; // 行间停顿：550ms
-            const FULL_PAUSE_DURATION = 1800; // 全部打完停顿：1.8s
-            const DELETE_SPEED = 55; // 删除速度：每字符 55ms
-            const EMPTY_PAUSE_DURATION = 700; // 删除完毕后停顿：0.7s
+            const TYPE_SPEED = 130;
+            const LINE_PAUSE_DURATION = 550;
+            const FULL_PAUSE_DURATION = 1800;
+            const DELETE_SPEED = 55;
+            const EMPTY_PAUSE_DURATION = 700;
 
-            // 状态计时器
             let stateTimer = 0;
             let lastTypeTime = 0;
             let lastDeleteTime = 0;
 
-            // 更新 DOM 中的文字
             function updateSloganDisplay() {
                 for (let i = 0; i < 3; i++) {
                     typedElements[i].textContent = sloganLines[i].substring(0, charCount[i]);
                 }
             }
 
-            // 更新光标显示
             function updateCursors() {
                 for (let i = 0; i < 3; i++) {
                     if (currentState === STATE.TYPING_LINE_0 && i === 0) {
@@ -747,7 +607,6 @@
                 }
             }
 
-            // 打字机状态机更新（在 requestAnimationFrame 中调用）
             function updateTypewriter(timestamp) {
                 const now = timestamp;
 
@@ -755,12 +614,10 @@
                     case STATE.TYPING_LINE_0:
                     case STATE.TYPING_LINE_1:
                     case STATE.TYPING_LINE_2: {
-                        // 确定当前行
                         const lineIndex =
                             currentState === STATE.TYPING_LINE_0 ? 0 :
                             currentState === STATE.TYPING_LINE_1 ? 1 : 2;
                         const fullText = sloganLines[lineIndex];
-
                         if (now - lastTypeTime >= TYPE_SPEED) {
                             if (charCount[lineIndex] < fullText.length) {
                                 charCount[lineIndex]++;
@@ -768,7 +625,6 @@
                                 updateSloganDisplay();
                                 updateCursors();
                             } else {
-                                // 当前行打完，进入停顿
                                 stateTimer = now;
                                 if (lineIndex === 0) {
                                     currentState = STATE.PAUSE_AFTER_LINE_0;
@@ -782,7 +638,6 @@
                         }
                         break;
                     }
-
                     case STATE.PAUSE_AFTER_LINE_0:
                         if (now - stateTimer >= LINE_PAUSE_DURATION) {
                             currentState = STATE.TYPING_LINE_1;
@@ -791,7 +646,6 @@
                             updateCursors();
                         }
                         break;
-
                     case STATE.PAUSE_AFTER_LINE_1:
                         if (now - stateTimer >= LINE_PAUSE_DURATION) {
                             currentState = STATE.TYPING_LINE_2;
@@ -800,7 +654,6 @@
                             updateCursors();
                         }
                         break;
-
                     case STATE.PAUSE_FULL:
                         if (now - stateTimer >= FULL_PAUSE_DURATION) {
                             currentState = STATE.DELETING;
@@ -809,7 +662,6 @@
                             updateCursors();
                         }
                         break;
-
                     case STATE.DELETING: {
                         if (now - lastDeleteTime >= DELETE_SPEED) {
                             if (currentDeletingLine >= 0) {
@@ -819,11 +671,9 @@
                                     updateSloganDisplay();
                                     updateCursors();
                                 } else {
-                                    // 当前行删完，移到上一行
                                     currentDeletingLine--;
                                     lastDeleteTime = now;
                                     updateCursors();
-                                    // 如果所有行都删完了
                                     if (currentDeletingLine < 0) {
                                         currentState = STATE.PAUSE_EMPTY;
                                         stateTimer = now;
@@ -834,10 +684,8 @@
                         }
                         break;
                     }
-
                     case STATE.PAUSE_EMPTY:
                         if (now - stateTimer >= EMPTY_PAUSE_DURATION) {
-                            // 重新开始
                             currentState = STATE.TYPING_LINE_0;
                             currentTypingLine = 0;
                             charCount = [0, 0, 0];
@@ -849,7 +697,6 @@
                 }
             }
 
-            // 初始化打字机显示
             function initTypewriter() {
                 charCount = [0, 0, 0];
                 currentState = STATE.TYPING_LINE_0;
@@ -877,36 +724,53 @@
                 clockElement.textContent = `${hours}:${minutes}:${seconds} · ${weekday}`;
             }
 
-            // 每秒更新时钟
-            setInterval(updateClock, 250); // 250ms 更新一次，确保秒数准确
-            updateClock(); // 立即更新一次
+            setInterval(updateClock, 250);
+            updateClock();
 
             // ============================================================
-            // 四、背景音乐（新增）
+            // 四、背景音乐
             // ============================================================
             const audio = new Audio('music.mp3');
-            audio.loop = true;   // 循环播放
+            audio.loop = true;
+            const toggleBtn = document.getElementById('music-toggle');
             let isMusicPlaying = false;
 
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (isMusicPlaying) {
+                    audio.pause();
+                    toggleBtn.textContent = '🎵';
+                } else {
+                    audio.play().then(() => {
+                        toggleBtn.textContent = '🎶';
+                    }).catch((err) => {
+                        toggleBtn.textContent = '❌';
+                        console.warn('音频播放失败:', err);
+                        setTimeout(() => {
+                            toggleBtn.textContent = '🎵';
+                        }, 2000);
+                    });
+                }
+                isMusicPlaying = !isMusicPlaying;
+            });
+
+            audio.addEventListener('ended', function() {
+                if (isMusicPlaying) {
+                    audio.play().catch(() => {});
+                }
+            });
+
             // ============================================================
-            // 五、点击涟漪动画 + 触发音乐播放（原有逻辑扩展）
+            // 五、点击涟漪
             // ============================================================
             window.addEventListener('click', function(e) {
-                // 如果音乐还没播放，则开始播放（用户首次点击）
-                if (!isMusicPlaying) {
-                    audio.play().catch(() => {}); // 忽略可能的小错误
-                    isMusicPlaying = true;
-                }
                 createRipple(e.clientX, e.clientY);
             });
 
-            // 移动端触摸支持
             window.addEventListener('touchstart', function(e) {
                 if (e.touches.length > 0) {
-                    if (!isMusicPlaying) {
-                        audio.play().catch(() => {});
-                        isMusicPlaying = true;
-                    }
                     createRipple(e.touches[0].clientX, e.touches[0].clientY);
                 }
             }, { passive: true });
@@ -917,11 +781,9 @@
                 ripple.style.left = x + 'px';
                 ripple.style.top = y + 'px';
                 document.body.appendChild(ripple);
-                // 动画结束后移除 DOM 元素
                 ripple.addEventListener('animationend', function() {
                     ripple.remove();
                 });
-                // 安全兜底：2秒后强制移除
                 setTimeout(function() {
                     if (ripple.parentNode) {
                         ripple.remove();
@@ -930,35 +792,27 @@
             }
 
             // ============================================================
-            // 六、主导 requestAnimationFrame 循环
+            // 六、主循环
             // ============================================================
             function mainLoop(timestamp) {
-                // Canvas 背景动画
                 animateCanvas(timestamp);
-                // 打字机状态机
                 updateTypewriter(timestamp);
-                // 继续循环
                 requestAnimationFrame(mainLoop);
             }
 
             // ============================================================
-            // 七、初始化所有内容
+            // 七、初始化
             // ============================================================
             function init() {
                 resizeCanvas();
                 initTypewriter();
                 updateClock();
-                // 启动主循环
                 requestAnimationFrame(mainLoop);
             }
 
             init();
 
-            // ============================================================
-            // 八、页面可见性处理（切换标签页时保持流畅）
-            // ============================================================
             document.addEventListener('visibilitychange', function() {
-                // 当页面重新可见时，重置时间基准以避免跳帧
                 if (!document.hidden) {
                     lastTypeTime = 0;
                     lastDeleteTime = 0;
