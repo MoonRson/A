@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>欢迎</title>
-    <!-- 引入思源宋体（Noto Serif SC） -->
+    <!-- 引入站酷小魏（用于时钟和社交链接等辅助文字） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <!-- 引入马善政毛笔行书（仅用于 Slogan） -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <style>
         /* ============================================================
                全局基础样式
@@ -16,11 +18,12 @@
             --bg-color: #FAF6F0;
             --ink-color: 139, 125, 107;
             --text-primary: #3D3629;
-            --line-decoration: #C5B8A5;
-            --text-secondary: #8B7D6B;
+            --line-decoration: #A09080;   /* 已加深 */
+            --text-secondary: #6B5F50;    /* 已加深 */
             --text-tertiary: #A89888;
             --ripple-color: 190, 170, 150;
-            --font-serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+            /* 核心替换：时钟、链接等辅助文字使用站酷小魏 */
+            --font-serif: 'ZCOOL XiaoWei', 'KaiTi', 'STKaiti', serif;
             --slogan-size: clamp(1.3rem, 3.2vw, 2rem);
             --clock-size: clamp(0.9rem, 2vw, 1.15rem);
             --social-size: clamp(1rem, 2.2vw, 1.3rem);
@@ -92,18 +95,19 @@
             pointer-events: auto;
         }
 
+        /* 左侧竖线：加粗加深（已优化） */
         .slogan-line-decoration {
             flex-shrink: 0;
-            width: 2px;
+            width: 3px;
             min-height: 100%;
             background: linear-gradient(to bottom,
                     transparent 0%,
                     var(--line-decoration) 12%,
                     var(--line-decoration) 88%,
                     transparent 100%);
-            border-radius: 1px;
+            border-radius: 2px;
             margin-right: clamp(16px, 3vw, 32px);
-            opacity: 0.75;
+            opacity: 0.95;
         }
 
         .slogan-text {
@@ -113,12 +117,14 @@
             text-align: left;
         }
 
+        /* Slogan 固定使用马善政行书 */
         .slogan-line {
+            font-family: 'Ma Shan Zheng', 'KaiTi', 'STKaiti', serif;
             font-size: var(--slogan-size);
             font-weight: 400;
             color: var(--text-primary);
-            line-height: 1.75;
-            letter-spacing: 0.06em;
+            line-height: 1.8;
+            letter-spacing: 0.08em;
             white-space: nowrap;
             min-height: 1.75em;
             transition: color 0.4s ease;
@@ -147,10 +153,11 @@
             51%, 100% { opacity: 0; }
         }
 
+        /* 时钟：继承 ZCOOL XiaoWei，保持加深颜色与常规字重 */
         .clock {
             margin-top: clamp(28px, 5vh, 48px);
             font-size: var(--clock-size);
-            font-weight: 300;
+            font-weight: 400;
             color: var(--text-secondary);
             letter-spacing: 0.12em;
             text-align: center;
@@ -158,6 +165,7 @@
             transition: color 0.4s ease;
         }
 
+        /* 社交链接：继承 ZCOOL XiaoWei */
         .social-links {
             margin-top: clamp(20px, 4vh, 36px);
             display: flex;
@@ -253,8 +261,8 @@
 
             .slogan-line-decoration {
                 margin-right: 14px;
-                width: 1.5px;
-                opacity: 0.65;
+                width: 2.5px;
+                opacity: 0.9;
             }
 
             .slogan-line {
@@ -279,7 +287,6 @@
                 font-size: clamp(0.95rem, 3.5vw, 1.15rem);
             }
 
-            /* 移动端：彻底隐藏文字标签，只显示图标 */
             .social-link::after {
                 display: none;
             }
@@ -344,7 +351,6 @@
                class="social-link" data-label="GitHub" aria-label="GitHub">🌱</a>
             <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer"
                class="social-link" data-label="Twitter" aria-label="Twitter">🕊️</a>
-            <!-- 微信链接已改为微信官网 -->
             <a href="https://weixin.qq.com/" target="_blank" rel="noopener noreferrer"
                class="social-link" data-label="WeChat" aria-label="WeChat">💬</a>
             <a href="mailto:hello@example.com" class="social-link" data-label="Email" aria-label="Email">✉️</a>
