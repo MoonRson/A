@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="安全随机号码生成与可验证随机凭证工具，仅供技术演示与娱乐使用。" />
   <meta name="theme-color" content="#F7F3ED" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Lottery Lab" />
   <title>Lottery Lab · 随机摇奖实验室</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Lottery%20Lab%22%2C%22short_name%22%3A%22Lottery%20Lab%22%2C%22description%22%3A%22%E9%9A%8F%E6%9C%BA%E6%91%87%E5%A5%96%E5%AE%9E%E9%AA%8C%E5%AE%A4%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F7F3ED%22%2C%22theme_color%22%3A%22%23F7F3ED%22%2C%22lang%22%3A%22zh-CN%22%7D" />
   <style>
     :root {
       --bg: #F7F3ED;
@@ -34,9 +39,16 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --header-h: 56px;
       --nav-h: 64px;
-      --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
-      --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+      --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Reduce motion / disable number animations when off */
+    body.no-anim .ball.pop,
+    body.no-anim .digit-card.pop,
+    body.no-anim .result-card {
+      animation: none !important;
     }
 
     [data-theme="dark"] {
@@ -177,10 +189,27 @@
     /* Main content */
     .main {
       flex: 1;
-      padding: 20px 16px 24px;
+      padding: 16px 16px 28px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
+    }
+
+    body.has-results .count-section,
+    body.has-results #gameTabs {
+      opacity: 0.72;
+    }
+
+    body.has-results .draw-area {
+      margin-bottom: 4px;
+    }
+
+    body.has-results .results-section {
+      margin-top: 4px;
+    }
+
+    body.has-results .today-section {
+      margin-top: 8px;
     }
 
     /* Hero */
@@ -206,21 +235,60 @@
     }
 
     .hero-desc {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
     }
+
+    .hero h1 { font-size: 20px; margin-bottom: 4px; }
+    .hero { padding: 4px 0 2px; }
+    .hero-sub { margin-bottom: 4px; letter-spacing: 0.1em; }
+
+    .onboard-tip {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gold-line);
+      background: var(--gold-soft);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+    .onboard-tip.visible { display: flex; }
+    .onboard-tip strong { color: var(--text); font-weight: 500; }
+    .onboard-dismiss {
+      flex-shrink: 0;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 4px 6px;
+      border-radius: var(--radius-sm);
+    }
+    .onboard-dismiss:hover { color: var(--text); }
 
     /* Category tabs */
     .category-tabs {
       display: flex;
-      gap: 8px;
-      justify-content: center;
+      gap: 6px;
+      justify-content: flex-start;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 2px 2px 4px;
+      margin: 0 -4px;
     }
+    .category-tabs::-webkit-scrollbar { display: none; }
 
     .cat-btn {
-      flex: 1;
-      max-width: 120px;
-      height: 40px;
+      flex: 1 0 auto;
+      min-width: 72px;
+      max-width: none;
+      height: 38px;
       border: 1px solid var(--border-strong);
       background: transparent;
       border-radius: var(--radius-full);
@@ -233,10 +301,11 @@
     }
 
     .cat-btn.active {
-      border-color: var(--gold-line);
+      border-color: var(--gold);
       background: var(--gold-soft);
       color: var(--text);
-      box-shadow: 0 0 0 1px var(--gold-line);
+      box-shadow: 0 0 0 1px var(--gold-line), 0 0 12px var(--gold-soft);
+      font-weight: 600;
     }
 
     .cat-btn:hover:not(.active) {
@@ -535,9 +604,17 @@
 
     .results-header {
       display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      padding: 0 4px;
+    }
+
+    .results-title-row {
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 4px;
+      gap: 8px;
     }
 
     .results-title {
@@ -553,14 +630,14 @@
     }
 
     .text-btn {
-      height: 32px;
-      padding: 0 12px;
-      border: 1px solid var(--border-strong);
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
       background: transparent;
       border-radius: var(--radius-full);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       cursor: pointer;
       transition: all var(--transition);
       font-family: var(--font-sans);
@@ -569,8 +646,14 @@
 
     .text-btn:hover {
       border-color: var(--gold-line);
-      color: var(--text);
+      color: var(--text-secondary);
       background: var(--gold-soft);
+    }
+
+    .text-btn.primary-text {
+      border-color: var(--border-strong);
+      color: var(--text-secondary);
+      font-size: 12px;
     }
 
     .result-card {
@@ -786,6 +869,50 @@
       font-size: 13px;
       color: var(--text-secondary);
       line-height: 1.6;
+    }
+
+    .today-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .today-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--transition);
+      min-height: 44px;
+    }
+
+    .today-link:hover {
+      border-color: var(--gold-line);
+      background: var(--gold-soft);
+      color: var(--text);
+    }
+
+    .today-link-meta {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .today-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      line-height: 1.5;
     }
 
     .today-tag {
@@ -1335,6 +1462,32 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    .back-top {
+      position: fixed;
+      right: 16px;
+      bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+      z-index: 90;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border-strong);
+      background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+      backdrop-filter: blur(10px);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+      transition: all var(--transition);
+    }
+    .back-top.visible { display: flex; }
+    .back-top:hover {
+      border-color: var(--gold-line);
+      color: var(--gold);
+    }
+
     /* Modal for desktop */
     @media (min-width: 768px) {
       .sheet {
@@ -1362,11 +1515,11 @@
       .result-numbers .ball { width: 40px; height: 40px; font-size: 15px; }
 
       .main { padding: 28px 24px 32px; }
-      .hero h1 { font-size: 26px; }
+      .hero h1 { font-size: 22px; }
     }
 
     /* Focus visible */
-    button:focus-visible, select:focus-visible {
+    button:focus-visible, select:focus-visible, textarea:focus-visible {
       outline: 2px solid var(--gold);
       outline-offset: 2px;
     }
@@ -1374,6 +1527,293 @@
     /* Hide scrollbar but keep scroll */
     .sheet::-webkit-scrollbar { width: 4px; }
     .sheet::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+    /* Preview note switcher */
+    .preview-nav {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .preview-nav.visible { display: flex; }
+    .preview-nav-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+    .preview-nav-btn:hover:not(:disabled) {
+      border-color: var(--gold-line);
+      color: var(--gold);
+    }
+    .preview-nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .preview-nav-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      min-width: 72px;
+      text-align: center;
+    }
+
+    .result-card.active-preview {
+      border-color: var(--gold-line);
+      box-shadow: 0 0 0 1px var(--gold-line), var(--shadow);
+    }
+
+    .op-btn.copied {
+      background: var(--gold-soft);
+      border-color: var(--gold-line);
+      color: var(--gold);
+    }
+
+    .custom-limit-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .file-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .file-row .op-btn { flex: 1; min-width: 120px; height: 40px; }
+
+    .verify-scope-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .history-detail-ops {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .history-detail-ops .text-btn { height: 30px; font-size: 12px; }
+
+    .history-item-expanded {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .history-ticket-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .history-ticket-row:last-child { border-bottom: none; }
+    .history-ticket-nums {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .aria-live-region {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .tz-tag {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+
+    .diff-field {
+      margin: 4px 0;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: var(--cinnabar-soft);
+      font-size: 12px;
+    }
+
+    /* Fair draw */
+    .fair-panel {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: var(--shadow);
+    }
+    .fair-panel.visible { display: flex; }
+    .fair-title {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .fair-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .fair-textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+    }
+    .fair-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .name-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 8px 16px;
+      margin: 4px;
+      border-radius: var(--radius-full);
+      background: var(--gold-soft);
+      border: 1px solid var(--gold-line);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .fair-inline-result {
+      margin-top: 8px;
+      padding: 14px 12px;
+      border: 1px solid var(--gold-line);
+      border-radius: var(--radius-sm);
+      background: var(--gold-soft);
+      text-align: center;
+    }
+    .fair-inline-result[hidden] { display: none !important; }
+    .fair-inline-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .fair-inline-names {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    /* Compare hits */
+    .hit-badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      margin-right: 4px;
+      margin-top: 4px;
+    }
+    .hit-badge.good {
+      background: rgba(61, 140, 90, 0.15);
+      color: #2d7a4f;
+    }
+    [data-theme="dark"] .hit-badge.good {
+      background: rgba(90, 180, 120, 0.15);
+      color: #7dcea0;
+    }
+    .hit-badge.mid {
+      background: var(--gold-soft);
+      color: var(--gold);
+    }
+    .hit-badge.none {
+      background: var(--border);
+      color: var(--text-muted);
+    }
+    .compare-field {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 10px;
+    }
+    .compare-select {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 10px;
+      font-family: var(--font-sans);
+    }
+    .compare-result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+      max-height: 40vh;
+      overflow-y: auto;
+    }
+    .compare-item {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      font-size: 13px;
+    }
+    .compare-item-nums {
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+      margin: 4px 0 6px;
+    }
+
+    .cat-btn { max-width: 88px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -1400,7 +1840,11 @@
         <div class="hero">
           <h1>随机摇奖实验室</h1>
           <p class="hero-sub">SECURE RANDOM · VERIFIABLE · FOR ENTERTAINMENT</p>
-          <p class="hero-desc">安全随机号码生成工具 · 仅供技术演示与娱乐使用</p>
+        </div>
+
+        <div class="onboard-tip" id="onboardTip" role="status">
+          <span><strong>快速开始：</strong>选择玩法 → 选择注数 → 点击开始摇奖</span>
+          <button type="button" class="onboard-dismiss" id="onboardDismiss" aria-label="关闭提示">×</button>
         </div>
 
         <!-- Category -->
@@ -1408,6 +1852,7 @@
           <button class="cat-btn active" data-cat="fc" role="tab" aria-selected="true">福彩</button>
           <button class="cat-btn" data-cat="tc" role="tab" aria-selected="false">体彩</button>
           <button class="cat-btn" data-cat="custom" role="tab" aria-selected="false">自定义</button>
+          <button class="cat-btn" data-cat="fair" role="tab" aria-selected="false">抽签</button>
         </div>
 
         <!-- Game tabs (standard) -->
@@ -1420,11 +1865,42 @@
         <div class="custom-panel" id="customPanel">
           <div class="custom-title">自定义组合</div>
           <div class="custom-items" id="customItems"></div>
+          <p class="custom-limit-hint" id="customLimitHint">还可添加 7 组 · 最多 8 组</p>
           <button class="add-custom-btn" id="addCustomBtn">+ 添加玩法</button>
           <button class="draw-btn" id="customDrawBtn" style="max-width:100%;margin-top:4px;">
             <span class="btn-text">🎲 生成组合</span>
             <span class="spinner"></span>
           </button>
+        </div>
+
+        <!-- Fair draw panel -->
+        <div class="fair-panel" id="fairPanel">
+          <div class="fair-title">公平抽签</div>
+          <p class="fair-desc">从名单中安全随机抽取 · 同样生成可验证凭证<br />适用于活动抽奖、分组、点名等 · 名单仅存于本机</p>
+          <textarea class="fair-textarea" id="fairListInput" placeholder="每行一个名字，例如：&#10;小明&#10;小红&#10;小刚&#10;小李" aria-label="抽签名单" maxlength="20000"></textarea>
+          <p class="fair-meta" id="fairListMeta">已输入 0 人 · 上限 500 人</p>
+          <div class="settings-item" style="padding:8px 0;border:none;min-height:auto;">
+            <div>
+              <div class="settings-label" style="font-size:13px;">去除重复姓名</div>
+              <div class="settings-desc">相同名字只保留一次</div>
+            </div>
+            <button class="toggle on" id="fairDedupToggle" role="switch" aria-checked="true" aria-label="去除重复姓名"></button>
+          </div>
+          <div class="count-section" style="padding:0;">
+            <span class="section-label">抽取人数</span>
+            <div class="count-btns" id="fairCountBtns" role="group" aria-label="抽取人数">
+              <button type="button" class="count-btn active" data-fair-count="1">1人</button>
+              <button type="button" class="count-btn" data-fair-count="2">2人</button>
+              <button type="button" class="count-btn" data-fair-count="3">3人</button>
+              <button type="button" class="count-btn" data-fair-count="4">4人</button>
+              <button type="button" class="count-btn" data-fair-count="5">5人</button>
+            </div>
+          </div>
+          <button class="draw-btn" id="fairDrawBtn" style="max-width:100%;">
+            <span class="btn-text">🎲 开始抽签</span>
+            <span class="spinner"></span>
+          </button>
+          <div id="fairInlineResult" class="fair-inline-result" hidden></div>
         </div>
 
         <!-- Count (standard only) -->
@@ -1442,11 +1918,16 @@
         <!-- Draw area (standard) -->
         <div class="draw-area" id="drawArea">
           <div class="draw-game-name" id="drawGameName">双色球</div>
-          <div class="draw-note" id="drawNote">准备就绪</div>
-          <div class="balls-container" id="ballsContainer">
+          <div class="draw-note" id="drawNote" aria-live="polite">准备就绪</div>
+          <div class="balls-container" id="ballsContainer" role="group" aria-label="号码预览">
             <p class="placeholder-text">点击下方按钮开始摇奖</p>
           </div>
-          <div class="progress-steps" id="progressSteps"></div>
+          <div class="preview-nav" id="previewNav" aria-label="切换注数">
+            <button type="button" class="preview-nav-btn" id="previewPrev" aria-label="上一注">‹</button>
+            <span class="preview-nav-label" id="previewNavLabel">1 / 1</span>
+            <button type="button" class="preview-nav-btn" id="previewNext" aria-label="下一注">›</button>
+          </div>
+          <div class="progress-steps" id="progressSteps" aria-live="polite"></div>
           <button class="draw-btn" id="drawBtn" aria-label="开始摇奖">
             <span class="btn-text">🎲 开始摇奖</span>
             <span class="spinner"></span>
@@ -1456,11 +1937,15 @@
         <!-- Results -->
         <div class="results-section" id="resultsSection">
           <div class="results-header">
-            <span class="results-title">生成结果</span>
+            <div class="results-title-row">
+              <span class="results-title">生成结果</span>
+              <button class="text-btn primary-text" id="copyAllBtn">复制全部</button>
+            </div>
             <div class="results-actions">
-              <button class="text-btn" id="copyAllBtn">复制全部</button>
+              <button class="text-btn" id="compareBtn">对照开奖</button>
               <button class="text-btn" id="copyFcBtn">复制福彩</button>
               <button class="text-btn" id="copyTcBtn">复制体彩</button>
+              <button class="text-btn" id="exportJsonBtn">导出 JSON</button>
             </div>
           </div>
           <div id="resultsList"></div>
@@ -1470,9 +1955,18 @@
         <div class="today-section">
           <div class="today-title">今日开奖</div>
           <div class="today-content">
-            暂无实时开奖数据接入。<br />
-            本区域预留接口，便于后续扩展官方数据源。
-            <div class="today-tag">演示数据 · 非实时</div>
+            本应用不接入实时开奖数据。请前往官方渠道查询最新开奖结果。
+            <div class="today-links">
+              <a class="today-link" href="https://www.cwl.gov.cn/" target="_blank" rel="noopener noreferrer">
+                <span>中国福利彩票官网</span>
+                <span class="today-link-meta">双色球 · 3D 等</span>
+              </a>
+              <a class="today-link" href="https://www.sporttery.cn/" target="_blank" rel="noopener noreferrer">
+                <span>中国体育彩票官网</span>
+                <span class="today-link-meta">大乐透 · 排列5 等</span>
+              </a>
+            </div>
+            <p class="today-note">链接将在新标签页打开 · 开奖信息以官方公布为准 · 本站不提供购彩服务</p>
           </div>
         </div>
 
@@ -1487,6 +1981,9 @@
       <div class="view" id="view-history">
         <div class="hero" style="padding-bottom:0;">
           <h1 style="font-size:20px;">历史记录</h1>
+          <div style="margin-top:10px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="text-btn" id="historyCompareBtn">对照开奖</button>
+          </div>
         </div>
         <div class="history-list" id="historyList"></div>
         <div class="history-clear-wrap" id="historyClearWrap" style="display:none;">
@@ -1521,6 +2018,13 @@
           </div>
           <div class="settings-item">
             <div>
+              <div class="settings-label">号码动画</div>
+              <div class="settings-desc">球号弹出与结果入场动画</div>
+            </div>
+            <button class="toggle on" id="animToggle" role="switch" aria-checked="true" aria-label="号码动画开关"></button>
+          </div>
+          <div class="settings-item">
+            <div>
               <div class="settings-label">默认生成数量</div>
             </div>
             <select class="settings-select" id="defaultCountSelect" aria-label="默认生成数量">
@@ -1540,7 +2044,7 @@
           <div class="settings-item">
             <div>
               <div class="settings-label">验证凭证</div>
-              <div class="settings-desc">粘贴凭证文本，校验 SHA-256 完整性</div>
+              <div class="settings-desc">粘贴或导入 JSON，校验 SHA-256</div>
             </div>
             <button class="text-btn" id="openVerifyBtn">验证</button>
           </div>
@@ -1549,12 +2053,18 @@
         <div class="about-info">
           <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text);">Lottery Lab</div>
           <div>随机摇奖实验室</div>
-          <div class="ver">版本 1.0.0</div>
-          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">
-            安全随机 · 可验证 · 仅供娱乐<br />
-            使用 crypto.getRandomValues + Rejection Sampling<br />
-            凭证支持本地 SHA-256 完整性校验<br />
-            所有数据仅保存在本地，不上传服务器
+          <div class="ver">版本 1.4.0</div>
+          <div style="margin-top:14px;font-size:12px;color:var(--text-secondary);line-height:1.7;text-align:left;max-width:360px;margin-left:auto;margin-right:auto;">
+            <strong style="color:var(--text);">产品定位</strong><br />
+            安全随机号码生成与可验证凭证工具，兼作本地公平抽签。仅供技术演示与娱乐使用。<br /><br />
+            <strong style="color:var(--text);">随机与凭证</strong><br />
+            · 核心随机源：浏览器 <code style="font-size:11px;">crypto.getRandomValues</code><br />
+            · 采样：无偏 Rejection Sampling / Fisher-Yates<br />
+            · 凭证 SHA-256 仅证明字段完整性，<strong>不构成公证</strong>，也不证明第三方可审计的硬件熵源<br /><br />
+            <strong style="color:var(--text);">隐私</strong><br />
+            号码、凭证、历史、抽签名单均仅保存在本机，不上传服务器，不收集身份信息。<br /><br />
+            <strong style="color:var(--text);">免责声明</strong><br />
+            不提供购彩、投注、支付或中奖预测；不宣称可提高中奖概率。开奖结果请以福彩 / 体彩官网为准。请理性对待随机结果。
           </div>
         </div>
       </div>
@@ -1583,7 +2093,7 @@
   <div class="sheet" id="certSheet" role="dialog" aria-modal="true" aria-labelledby="certTitle">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="certTitle">随机凭证</div>
-    <div class="cert-verified" id="certVerifiedBadge">VERIFIED</div>
+    <div class="cert-verified" id="certVerifiedBadge">完整性校验</div>
     <div class="cert-verify-status" id="certLiveStatus"></div>
     <div id="certContent"></div>
     <div class="cert-actions">
@@ -1596,16 +2106,55 @@
   <div class="sheet" id="verifySheet" role="dialog" aria-modal="true" aria-labelledby="verifyTitle">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="verifyTitle">验证随机凭证</div>
+    <div class="verify-scope-note">
+      <strong>验证范围：</strong>校验凭证字段与 SHA-256 是否一致（防篡改）。<br />
+      <strong>不包含：</strong>不证明生成端一定使用了安全随机源，也不构成第三方公证。
+    </div>
     <p class="verify-hint">
-      粘贴完整凭证文本（含 JSON 区块）或仅粘贴 CERT JSON。<br />
-      系统将按相同字段顺序重建载荷并重新计算 SHA-256，与凭证中的哈希比对。
+      粘贴完整凭证（含 CERT JSON），或导入 .json 文件。
     </p>
-    <textarea class="verify-textarea" id="verifyInput" placeholder="在此粘贴凭证内容…" spellcheck="false" aria-label="凭证内容"></textarea>
+    <div class="file-row">
+      <button type="button" class="op-btn" id="pickCertFileBtn">选择 JSON 文件</button>
+      <input type="file" id="certFileInput" accept=".json,application/json,text/plain" class="sr-only" aria-label="选择凭证文件" />
+    </div>
+    <textarea class="verify-textarea" id="verifyInput" placeholder="在此粘贴凭证内容，或拖入 JSON 文件…" spellcheck="false" aria-label="凭证内容"></textarea>
     <div class="verify-result-box" id="verifyResultBox"></div>
     <div class="cert-actions">
       <button class="op-btn" id="runVerifyBtn">开始验证</button>
       <button class="op-btn" id="clearVerifyBtn">清空</button>
     </div>
+  </div>
+
+  <div class="aria-live-region" id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="sheet" id="compareSheet" role="dialog" aria-modal="true" aria-labelledby="compareTitle">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="compareTitle">对照开奖</div>
+    <p class="verify-hint">从官网查询开奖号后粘贴到下方，与当前结果或全部历史做本地命中比对。不联网、不保存官方数据。</p>
+    <label class="section-label" for="compareScopeSelect">对照范围</label>
+    <select class="compare-select" id="compareScopeSelect" aria-label="对照范围">
+      <option value="current">仅当前结果</option>
+      <option value="history">全部历史记录</option>
+      <option value="all">当前结果 + 全部历史</option>
+    </select>
+    <label class="section-label" for="compareGameSelect">玩法</label>
+    <select class="compare-select" id="compareGameSelect" aria-label="对照玩法">
+      <option value="ssq">双色球</option>
+      <option value="3d">3D</option>
+      <option value="dlt">大乐透</option>
+      <option value="pl5">排列5</option>
+    </select>
+    <label class="section-label" for="compareOfficialInput">官方开奖号码</label>
+    <input class="compare-field" id="compareOfficialInput" type="text" placeholder="例：03 08 14 19 27 31 + 09" aria-label="官方开奖号码" autocomplete="off" />
+    <p class="fair-meta" style="text-align:left;margin-bottom:8px;">
+      支持空格、逗号、加号分隔
+      <button type="button" class="text-btn" id="fillCompareExample" style="margin-left:6px;height:26px;">填入格式示例</button>
+    </p>
+    <div class="cert-actions">
+      <button type="button" class="op-btn" id="runCompareBtn">开始对照</button>
+      <button type="button" class="op-btn" id="clearCompareBtn">清空</button>
+    </div>
+    <div class="compare-result-list" id="compareResultList"></div>
   </div>
 
   <div class="sheet confirm-sheet" id="confirmSheet" role="dialog" aria-modal="true">
@@ -1618,6 +2167,7 @@
     </div>
   </div>
 
+  <button type="button" class="back-top" id="backTop" aria-label="回到顶部">↑</button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -1625,9 +2175,11 @@
     'use strict';
 
     // ========== Constants ==========
-    const VERSION = '1.0.0';
+    const VERSION = '1.4.0';
     const STORAGE_KEY = 'lottery_lab_v1';
     const HISTORY_MAX = 50;
+    const CUSTOM_MAX = 8;
+    const FAIR_LIST_MAX = 500;
 
     const GAMES = {
       ssq: {
@@ -1663,6 +2215,13 @@
         code: 'PL5',
         type: 'digits',
         length: 5
+      },
+      fair: {
+        id: 'fair',
+        name: '公平抽签',
+        category: 'fair',
+        code: 'FAIR',
+        type: 'names'
       }
     };
 
@@ -1673,15 +2232,22 @@
       category: 'fc',
       game: 'ssq',
       count: 1,
-      results: [], // current session results
+      fairCount: 1,
+      fairDedup: true,
+      results: [],
+      previewIndex: 0,
       customItems: [{ game: 'ssq', count: 1 }],
-      theme: 'system', // system | light | dark
+      theme: 'system',
       sound: false,
+      anim: true,
       defaultCount: 1,
       history: [],
+      expandedHistoryId: null,
       currentCert: null,
       drawing: false
     };
+
+    let focusTrapCleanup = null;
 
     // ========== Utilities ==========
     function pad2(n) {
@@ -1787,6 +2353,9 @@
     }
 
     function formatNumbers(game, result) {
+      if (game.type === 'names') {
+        return (result.names || []).join('、');
+      }
       if (game.type === 'digits') {
         return result.digits.join('');
       }
@@ -1808,7 +2377,7 @@
     }
 
     // ========== Generate one ticket ==========
-    async function generateOne(gameId) {
+    async function generateOne(gameId, extra) {
       const game = GAMES[gameId];
       const generatedAt = new Date();
       const certId = generateCertId(game.code);
@@ -1824,9 +2393,17 @@
           result.front = sampleDistinct(game.front.min, game.front.max, game.front.count);
           result.back = sampleDistinct(game.back.min, game.back.max, game.back.count);
         }
-      } else {
+      } else if (game.type === 'digits') {
         result.digits = sampleDigits(game.length);
         samplingAlgorithm = 'Rejection Sampling (uniform digits)';
+      } else if (game.type === 'names') {
+        const pool = (extra && extra.pool) || [];
+        const k = (extra && extra.count) || 1;
+        if (pool.length < k) throw new Error('名单人数不足');
+        const indices = sampleDistinct(0, pool.length - 1, k);
+        result.names = indices.map(i => pool[i]);
+        result.poolSize = pool.length;
+        samplingAlgorithm = 'Rejection Sampling + Fisher-Yates (list indices)';
       }
 
       const numbersStr = formatNumbers(game, result);
@@ -1908,12 +2485,15 @@
         const data = JSON.parse(raw);
         if (data.theme) state.theme = data.theme;
         if (typeof data.sound === 'boolean') state.sound = data.sound;
+        if (typeof data.anim === 'boolean') state.anim = data.anim;
+        if (typeof data.fairDedup === 'boolean') state.fairDedup = data.fairDedup;
         if (data.defaultCount >= 1 && data.defaultCount <= 5) {
           state.defaultCount = data.defaultCount;
           state.count = data.defaultCount;
         }
         if (Array.isArray(data.history)) state.history = data.history;
       } catch (e) { /* ignore */ }
+      applyAnimPref();
     }
 
     function saveStorage() {
@@ -1921,10 +2501,55 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           theme: state.theme,
           sound: state.sound,
+          anim: state.anim,
+          fairDedup: state.fairDedup,
           defaultCount: state.defaultCount,
           history: state.history.slice(0, HISTORY_MAX)
         }));
-      } catch (e) { /* ignore */ }
+      } catch (e) {
+        showToast('本地存储已满，历史可能无法保存');
+      }
+    }
+
+    function applyAnimPref() {
+      document.body.classList.toggle('no-anim', !state.anim);
+    }
+
+    function announce(msg) {
+      const el = document.getElementById('ariaLive');
+      if (el) el.textContent = msg;
+    }
+
+    function markCopied(btn) {
+      if (!btn) return;
+      const prev = btn.textContent;
+      btn.classList.add('copied');
+      btn.textContent = '已复制';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.textContent = prev;
+      }, 1400);
+    }
+
+    function downloadJson(filename, obj) {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function ticketToExport(t) {
+      const c = t.cert;
+      return {
+        ...buildHashPayload(c),
+        sha256: c.sha256
+      };
     }
 
     function addToHistory(tickets) {
@@ -2027,6 +2652,10 @@
       const countSec = document.getElementById('countSection');
       const drawArea = document.getElementById('drawArea');
       const customPanel = document.getElementById('customPanel');
+      const fairPanel = document.getElementById('fairPanel');
+
+      customPanel.classList.remove('visible');
+      fairPanel.classList.remove('visible');
 
       if (state.category === 'custom') {
         tabs.style.display = 'none';
@@ -2037,10 +2666,18 @@
         return;
       }
 
+      if (state.category === 'fair') {
+        tabs.style.display = 'none';
+        countSec.style.display = 'none';
+        drawArea.style.display = 'none';
+        fairPanel.classList.add('visible');
+        updateFairListMeta();
+        return;
+      }
+
       tabs.style.display = 'flex';
       countSec.style.display = 'flex';
       drawArea.style.display = 'flex';
-      customPanel.classList.remove('visible');
 
       const games = state.category === 'fc' ? ['ssq', '3d'] : ['dlt', 'pl5'];
       tabs.innerHTML = games.map(g => {
@@ -2053,17 +2690,362 @@
           state.game = btn.dataset.game;
           updateGameTabs();
           updateDrawArea();
-          // clear preview
           document.getElementById('ballsContainer').innerHTML = '<p class="placeholder-text">点击下方按钮开始摇奖</p>';
           document.getElementById('drawNote').textContent = '准备就绪';
         });
       });
 
-      // Ensure current game is valid for category
       if (!games.includes(state.game)) {
         state.game = games[0];
       }
       updateDrawArea();
+    }
+
+    function parseFairList(text, dedup) {
+      let list = String(text || '')
+        .split(/\r?\n/)
+        .map(s => s.trim())
+        .filter(Boolean);
+      const rawCount = list.length;
+      if (dedup) {
+        const seen = new Set();
+        list = list.filter(name => {
+          if (seen.has(name)) return false;
+          seen.add(name);
+          return true;
+        });
+      }
+      const truncated = list.length > FAIR_LIST_MAX;
+      if (truncated) list = list.slice(0, FAIR_LIST_MAX);
+      return { list, rawCount, dedupedCount: list.length, truncated };
+    }
+
+    function updateFairListMeta() {
+      const { list, rawCount, truncated } = parseFairList(
+        document.getElementById('fairListInput').value,
+        state.fairDedup
+      );
+      const el = document.getElementById('fairListMeta');
+      if (!el) return;
+      const parts = [`有效 ${list.length} 人`];
+      if (state.fairDedup && rawCount > list.length && !truncated) {
+        parts.push(`已去重 ${rawCount - list.length} 个重复`);
+      }
+      if (truncated) parts.push(`已截断至上限 ${FAIR_LIST_MAX}`);
+      parts.push(`上限 ${FAIR_LIST_MAX}`);
+      if (list.length) parts.push(`将抽 ${Math.min(state.fairCount, list.length)} 人`);
+      el.textContent = parts.join(' · ');
+    }
+
+    async function doFairDraw() {
+      if (state.drawing) return;
+      const { list: pool, rawCount, truncated } = parseFairList(
+        document.getElementById('fairListInput').value,
+        state.fairDedup
+      );
+      if (pool.length < 1) {
+        showToast(rawCount > 0 && state.fairDedup ? '去重后名单为空' : '请先输入至少 1 个名字');
+        return;
+      }
+      if (truncated) {
+        showToast(`名单超过 ${FAIR_LIST_MAX} 人，仅使用前 ${FAIR_LIST_MAX} 人`);
+      }
+      const k = Math.min(state.fairCount, pool.length);
+      if (k < 1) {
+        showToast('抽取人数无效');
+        return;
+      }
+
+      state.drawing = true;
+      const btn = document.getElementById('fairDrawBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      playStartSound();
+
+      try {
+        const ticket = await generateOne('fair', { pool, count: k });
+        playDoneSound();
+        state.results = [ticket];
+        state.previewIndex = 0;
+        addToHistory([ticket]);
+        dismissOnboard();
+        renderResults();
+        showPreviewTicket(0);
+
+        const inline = document.getElementById('fairInlineResult');
+        if (inline) {
+          const names = (ticket.result.names || []).map(n =>
+            `<span class="name-chip">${n}</span>`
+          ).join('');
+          inline.innerHTML = `
+            <div class="fair-inline-label">✓ 本轮中签 · ${k} 人（完整结果见下方，含凭证）</div>
+            <div class="fair-inline-names">${names}</div>`;
+          inline.hidden = false;
+        }
+
+        showToast(`✓ 已抽出 ${k} 人`);
+        announce(`抽签完成，抽出 ${k} 人`);
+      } catch (e) {
+        showToast('抽签失败：' + (e.message || '未知错误'));
+      }
+
+      state.drawing = false;
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    // ========== Compare official draws ==========
+    function inRange(n, min, max) {
+      return Number.isInteger(n) && n >= min && n <= max;
+    }
+
+    function hasUnique(arr) {
+      return new Set(arr).size === arr.length;
+    }
+
+    /** @returns {{ ok: true, data: object } | { ok: false, error: string }} */
+    function parseOfficialNumbers(gameId, text) {
+      const raw = String(text || '').trim();
+      if (!raw) return { ok: false, error: '请输入官方开奖号码' };
+      const game = GAMES[gameId];
+      if (!game) return { ok: false, error: '未知玩法' };
+
+      if (game.type === 'digits') {
+        const digits = raw.replace(/\D/g, '').split('').map(Number);
+        if (digits.length !== game.length) {
+          return { ok: false, error: `${game.name} 应为 ${game.length} 位数字（当前识别到 ${digits.length} 位）` };
+        }
+        if (digits.some(d => !inRange(d, 0, 9))) {
+          return { ok: false, error: '每位数字须在 0～9' };
+        }
+        return { ok: true, data: { digits } };
+      }
+
+      const parts = raw.split(/[+＋]/);
+      const main = (parts[0] || '').match(/\d+/g) || [];
+      const special = (parts[1] || '').match(/\d+/g) || [];
+      const nums = main.map(n => parseInt(n, 10));
+      const specs = special.map(n => parseInt(n, 10));
+
+      if (gameId === 'ssq') {
+        if (nums.length !== 6 || specs.length !== 1) {
+          return { ok: false, error: '双色球格式：6 个红球 + 1 个蓝球，例如 03 08 14 19 27 31 + 09' };
+        }
+        if (nums.some(n => !inRange(n, 1, 33))) {
+          return { ok: false, error: '红球须在 01～33，且为整数' };
+        }
+        if (!hasUnique(nums)) {
+          return { ok: false, error: '红球不能重复' };
+        }
+        if (!inRange(specs[0], 1, 16)) {
+          return { ok: false, error: '蓝球须在 01～16' };
+        }
+        return {
+          ok: true,
+          data: { red: nums.slice().sort((a, b) => a - b), blue: specs }
+        };
+      }
+
+      if (gameId === 'dlt') {
+        let front, back;
+        if (nums.length === 5 && specs.length === 2) {
+          front = nums;
+          back = specs;
+        } else if (nums.length === 7 && specs.length === 0) {
+          front = nums.slice(0, 5);
+          back = nums.slice(5);
+        } else {
+          return { ok: false, error: '大乐透格式：5 个前区 + 2 个后区，例如 03 08 14 19 27 + 02 09' };
+        }
+        if (front.some(n => !inRange(n, 1, 35))) {
+          return { ok: false, error: '前区号码须在 01～35' };
+        }
+        if (back.some(n => !inRange(n, 1, 12))) {
+          return { ok: false, error: '后区号码须在 01～12' };
+        }
+        if (!hasUnique(front)) return { ok: false, error: '前区号码不能重复' };
+        if (!hasUnique(back)) return { ok: false, error: '后区号码不能重复' };
+        return {
+          ok: true,
+          data: {
+            front: front.slice().sort((a, b) => a - b),
+            back: back.slice().sort((a, b) => a - b)
+          }
+        };
+      }
+
+      return { ok: false, error: '无法识别该玩法的号码格式' };
+    }
+
+    function compareTicket(gameId, ticket, official) {
+      if (ticket.gameId !== gameId) return null;
+      const r = ticket.result;
+      if (gameId === 'ssq') {
+        const redSet = new Set(official.red);
+        const redHit = r.red.filter(n => redSet.has(n)).length;
+        const blueHit = r.blue[0] === official.blue[0];
+        // Official-like tiers for reference only (not a prize engine)
+        let ref = '未中';
+        if (redHit === 6 && blueHit) ref = '一等奖';
+        else if (redHit === 6) ref = '二等奖';
+        else if (redHit === 5 && blueHit) ref = '三等奖';
+        else if (redHit === 5 || (redHit === 4 && blueHit)) ref = '四等奖';
+        else if (redHit === 4 || (redHit === 3 && blueHit)) ref = '五等奖';
+        else if (blueHit) ref = '六等奖';
+        return {
+          summary: `红球 ${redHit}/6` + (blueHit ? ' · 蓝球中' : ' · 蓝球未中'),
+          refLabel: ref === '未中' ? '' : `参考奖级：${ref}`,
+          score: redHit + (blueHit ? 10 : 0)
+        };
+      }
+      if (gameId === 'dlt') {
+        const fSet = new Set(official.front);
+        const bSet = new Set(official.back);
+        const frontHit = r.front.filter(n => fSet.has(n)).length;
+        const backHit = r.back.filter(n => bSet.has(n)).length;
+        let ref = '未中';
+        if (frontHit === 5 && backHit === 2) ref = '一等奖';
+        else if (frontHit === 5 && backHit === 1) ref = '二等奖';
+        else if (frontHit === 5 || (frontHit === 4 && backHit === 2)) ref = '三等奖';
+        else if (frontHit >= 3 || backHit === 2) ref = '有命中';
+        return {
+          summary: `前区 ${frontHit}/5 · 后区 ${backHit}/2`,
+          refLabel: ref === '未中' || ref === '有命中' ? (ref === '有命中' ? '参考：有命中' : '') : `参考奖级：${ref}`,
+          score: frontHit * 2 + backHit
+        };
+      }
+      if (gameId === '3d' || gameId === 'pl5') {
+        const a = r.digits;
+        const b = official.digits;
+        let pos = 0;
+        for (let i = 0; i < a.length; i++) if (a[i] === b[i]) pos++;
+        const exact = pos === a.length;
+        return {
+          summary: exact ? '号码完全一致' : `位置命中 ${pos}/${a.length}`,
+          refLabel: exact ? '参考：直选一致' : (pos > 0 ? '参考：部分位置相同' : ''),
+          score: pos
+        };
+      }
+      return null;
+    }
+
+    function collectCompareTickets(gameId, scope) {
+      const items = [];
+      const seen = new Set();
+
+      const pushTicket = (t, meta) => {
+        if (!t || t.gameId !== gameId) return;
+        // Deduplicate by certificateId when available
+        const key = (t.cert && t.cert.certificateId) || (t.numbersStr + '|' + (t.generatedAt || ''));
+        if (seen.has(key)) return;
+        seen.add(key);
+        items.push({
+          ticket: t,
+          source: meta.source,
+          timeLabel: meta.timeLabel || ''
+        });
+      };
+
+      if (scope === 'current' || scope === 'all') {
+        state.results.forEach((t, i) => {
+          pushTicket(t, {
+            source: '当前结果',
+            timeLabel: `第 ${pad2(i + 1)} 注`
+          });
+        });
+      }
+
+      if (scope === 'history' || scope === 'all') {
+        state.history.forEach(entry => {
+          const time = entry.time ? formatDateTime(new Date(entry.time)) : '';
+          (entry.tickets || []).forEach((t, i) => {
+            pushTicket(t, {
+              source: '历史',
+              timeLabel: time ? `${time} · 第 ${pad2(i + 1)} 注` : `第 ${pad2(i + 1)} 注`
+            });
+          });
+        });
+      }
+
+      return items;
+    }
+
+    function runCompare() {
+      const gameId = document.getElementById('compareGameSelect').value;
+      const scope = document.getElementById('compareScopeSelect').value || 'current';
+      const parsed = parseOfficialNumbers(gameId, document.getElementById('compareOfficialInput').value);
+      const list = document.getElementById('compareResultList');
+      if (!parsed.ok) {
+        list.innerHTML = `<div class="compare-item">${parsed.error || '无法解析官方号码'}</div>`;
+        showToast('号码格式有误');
+        return;
+      }
+      const official = parsed.data;
+
+      const items = collectCompareTickets(gameId, scope);
+      if (!items.length) {
+        const tip = scope === 'current'
+          ? '当前结果中没有该玩法的号码。可切换为「全部历史记录」，或先生成 / 从历史恢复。'
+          : scope === 'history'
+            ? '历史记录中没有该玩法的号码。'
+            : '当前结果与历史中都没有该玩法的号码。';
+        list.innerHTML = `<div class="compare-item">${tip}</div>`;
+        return;
+      }
+
+      // Sort: higher score first, then by time label
+      const ranked = items.map((item, idx) => {
+        const cmp = compareTicket(gameId, item.ticket, official);
+        return { item, cmp, idx };
+      }).filter(x => x.cmp).sort((a, b) => (b.cmp.score - a.cmp.score) || (a.idx - b.idx));
+
+      const hitCount = ranked.filter(x => x.cmp.score > 0).length;
+      const summary = `<div class="compare-item" style="border-color:var(--gold-line);">
+        共对照 <strong>${ranked.length}</strong> 注 · 有命中 <strong>${hitCount}</strong> 注
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">范围：${scope === 'current' ? '当前结果' : scope === 'history' ? '全部历史' : '当前 + 历史'} · 按命中程度排序</div>
+      </div>`;
+
+      const rows = ranked.map(({ item, cmp }) => {
+        const cls = cmp.score >= 6 ? 'good' : (cmp.score > 0 ? 'mid' : 'none');
+        const ref = cmp.refLabel
+          ? `<span class="hit-badge none">${cmp.refLabel}</span>`
+          : `<span class="hit-badge none">参考：未中</span>`;
+        return `<div class="compare-item">
+          <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <span>${item.ticket.gameName}</span>
+            <span style="font-size:11px;color:var(--text-muted);">${item.source}${item.timeLabel ? ' · ' + item.timeLabel : ''}</span>
+          </div>
+          <div class="compare-item-nums">${item.ticket.numbersStr}</div>
+          <span class="hit-badge ${cls}">${cmp.summary}</span>
+          ${ref}
+        </div>`;
+      }).join('');
+
+      const note = `<div class="fair-meta" style="text-align:left;margin-top:8px;">命中摘要为本地比对结果；奖级仅供参考，不作为兑奖依据，请以官方规则为准。</div>`;
+      list.innerHTML = summary + rows + note;
+      showToast(`✓ 对照完成 · ${ranked.length} 注`);
+    }
+
+    function openCompareSheet(defaultScope) {
+      const list = document.getElementById('compareResultList');
+      list.innerHTML = '';
+      if (defaultScope) {
+        document.getElementById('compareScopeSelect').value = defaultScope;
+      }
+      if (state.results.length) {
+        const firstLottery = state.results.find(t => t.gameId !== 'fair');
+        if (firstLottery) document.getElementById('compareGameSelect').value = firstLottery.gameId;
+      } else {
+        // Prefer a game that exists in history
+        for (const entry of state.history) {
+          const t = (entry.tickets || []).find(x => x.gameId && x.gameId !== 'fair');
+          if (t) {
+            document.getElementById('compareGameSelect').value = t.gameId;
+            break;
+          }
+        }
+      }
+      openSheet('compareSheet');
     }
 
     function updateDrawArea() {
@@ -2074,6 +3056,13 @@
     // ========== Custom items ==========
     function renderCustomItems() {
       const container = document.getElementById('customItems');
+      const remain = CUSTOM_MAX - state.customItems.length;
+      const hint = document.getElementById('customLimitHint');
+      if (hint) {
+        hint.textContent = remain > 0
+          ? `还可添加 ${remain} 组 · 最多 ${CUSTOM_MAX} 组`
+          : `已达上限 ${CUSTOM_MAX} 组`;
+      }
       container.innerHTML = state.customItems.map((item, idx) => {
         const opts = GAME_LIST.map(g =>
           `<option value="${g}" ${item.game === g ? 'selected' : ''}>${GAMES[g].name}</option>`
@@ -2108,23 +3097,72 @@
     // ========== Render results ==========
     function renderBallsHTML(ticket, size = 'normal') {
       const game = GAMES[ticket.gameId];
+      if (!game) return '';
       const ballClass = size === 'small' ? 'result-numbers' : 'balls-row';
+      if (game.type === 'names') {
+        const names = ticket.result.names || [];
+        return `<div class="${ballClass}" role="list" style="flex-wrap:wrap;">${names.map(n =>
+          `<span class="name-chip" role="listitem" aria-label="中签 ${n}">${n}</span>`
+        ).join('')}</div>`;
+      }
       if (game.type === 'digits') {
-        return `<div class="${ballClass}">${ticket.result.digits.map(d =>
-          `<div class="digit-card">${d}</div>`
+        return `<div class="${ballClass}" role="list">${ticket.result.digits.map(d =>
+          `<div class="digit-card" role="listitem" aria-label="数字 ${d}">${d}</div>`
         ).join('')}</div>`;
       }
       if (game.id === 'ssq') {
-        const reds = ticket.result.red.map(n => `<div class="ball red">${pad2(n)}</div>`).join('');
-        const blue = `<div class="ball blue">${pad2(ticket.result.blue[0])}</div>`;
-        return `<div class="${ballClass}">${reds}<span class="plus-sign">+</span>${blue}</div>`;
+        const reds = ticket.result.red.map(n =>
+          `<div class="ball red" role="listitem" aria-label="红球 ${pad2(n)}">${pad2(n)}</div>`
+        ).join('');
+        const blue = `<div class="ball blue" role="listitem" aria-label="蓝球 ${pad2(ticket.result.blue[0])}">${pad2(ticket.result.blue[0])}</div>`;
+        return `<div class="${ballClass}" role="list">${reds}<span class="plus-sign" aria-hidden="true">+</span>${blue}</div>`;
       }
       if (game.id === 'dlt') {
-        const front = ticket.result.front.map(n => `<div class="ball red">${pad2(n)}</div>`).join('');
-        const back = ticket.result.back.map(n => `<div class="ball blue">${pad2(n)}</div>`).join('');
-        return `<div class="${ballClass}">${front}<span class="plus-sign">+</span>${back}</div>`;
+        const front = ticket.result.front.map(n =>
+          `<div class="ball red" role="listitem" aria-label="前区 ${pad2(n)}">${pad2(n)}</div>`
+        ).join('');
+        const back = ticket.result.back.map(n =>
+          `<div class="ball blue" role="listitem" aria-label="后区 ${pad2(n)}">${pad2(n)}</div>`
+        ).join('');
+        return `<div class="${ballClass}" role="list">${front}<span class="plus-sign" aria-hidden="true">+</span>${back}</div>`;
       }
       return '';
+    }
+
+    function showPreviewTicket(index) {
+      if (!state.results.length) return;
+      state.previewIndex = Math.max(0, Math.min(index, state.results.length - 1));
+      const ticket = state.results[state.previewIndex];
+      const container = document.getElementById('ballsContainer');
+      const note = document.getElementById('drawNote');
+      const nav = document.getElementById('previewNav');
+      const label = document.getElementById('previewNavLabel');
+      const prevBtn = document.getElementById('previewPrev');
+      const nextBtn = document.getElementById('previewNext');
+
+      note.textContent = state.results.length > 1
+        ? `第 ${pad2(state.previewIndex + 1)} 注 · 共 ${state.results.length} 注`
+        : '第 01 注';
+      container.innerHTML = renderBallsHTML(ticket);
+      if (state.anim) {
+        container.querySelectorAll('.ball, .digit-card').forEach((el, i) => {
+          el.classList.add('pop');
+          el.style.animationDelay = `${i * 40}ms`;
+        });
+      }
+
+      if (state.results.length > 1) {
+        nav.classList.add('visible');
+        label.textContent = `${state.previewIndex + 1} / ${state.results.length}`;
+        prevBtn.disabled = state.previewIndex <= 0;
+        nextBtn.disabled = state.previewIndex >= state.results.length - 1;
+      } else {
+        nav.classList.remove('visible');
+      }
+
+      document.querySelectorAll('.result-card').forEach(card => {
+        card.classList.toggle('active-preview', +card.dataset.idx === state.previewIndex);
+      });
     }
 
     function renderResults() {
@@ -2132,14 +3170,18 @@
       const list = document.getElementById('resultsList');
       if (!state.results.length) {
         section.classList.remove('visible');
+        document.getElementById('previewNav').classList.remove('visible');
+        document.body.classList.remove('has-results');
         return;
       }
       section.classList.add('visible');
+      document.body.classList.add('has-results');
 
       list.innerHTML = state.results.map((ticket, idx) => {
         const noteLabel = state.results.length > 1 ? `第 ${pad2(idx + 1)} 注` : '';
+        const active = idx === state.previewIndex ? 'active-preview' : '';
         return `
-          <div class="result-card" data-idx="${idx}">
+          <div class="result-card ${active}" data-idx="${idx}" role="button" tabindex="0" aria-label="${ticket.gameName} ${noteLabel || ''}">
             <div class="result-card-header">
               <span class="result-game">${ticket.gameName}</span>
               <span class="result-note">${noteLabel}</span>
@@ -2147,7 +3189,7 @@
             ${renderBallsHTML(ticket, 'small')}
             <div class="result-badges">
               <span class="badge">Secure Random</span>
-              <span class="badge">Verified</span>
+              <span class="badge">完整性校验</span>
             </div>
             <div class="result-ops">
               <button class="op-btn" data-action="copy" data-idx="${idx}">复制</button>
@@ -2157,25 +3199,41 @@
           </div>`;
       }).join('');
 
+      list.querySelectorAll('.result-card').forEach(card => {
+        const select = () => showPreviewTicket(+card.dataset.idx);
+        card.addEventListener('click', e => {
+          if (e.target.closest('.op-btn')) return;
+          select();
+        });
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            select();
+          }
+        });
+      });
+
       list.querySelectorAll('.op-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
           const idx = +btn.dataset.idx;
           const action = btn.dataset.action;
           const ticket = state.results[idx];
-          if (action === 'copy') handleCopyTicket(ticket);
+          if (action === 'copy') handleCopyTicket(ticket, btn);
           else if (action === 'cert') openCert(ticket);
           else if (action === 'share') handleShareTicket(ticket);
         });
       });
 
-      // Animate balls
-      list.querySelectorAll('.ball, .digit-card').forEach((el, i) => {
-        el.style.opacity = '0';
-        setTimeout(() => {
-          el.style.opacity = '1';
-          el.classList.add('pop');
-        }, i * 40);
-      });
+      if (state.anim) {
+        list.querySelectorAll('.ball, .digit-card').forEach((el, i) => {
+          el.style.opacity = '0';
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.classList.add('pop');
+          }, i * 40);
+        });
+      }
     }
 
     // ========== Progress animation ==========
@@ -2234,18 +3292,13 @@
       playDoneSound();
 
       state.results = tickets;
+      state.previewIndex = 0;
       addToHistory(tickets);
-
-      // Show first ticket in draw area
-      const container = document.getElementById('ballsContainer');
-      document.getElementById('drawNote').textContent = count > 1 ? `已生成 ${count} 注` : '第 01 注';
-      container.innerHTML = renderBallsHTML(tickets[0]);
-      container.querySelectorAll('.ball, .digit-card').forEach((el, i) => {
-        el.classList.add('pop');
-        el.style.animationDelay = `${i * 50}ms`;
-      });
+      dismissOnboard();
 
       renderResults();
+      showPreviewTicket(0);
+      announce(`已生成 ${count} 注`);
       showToast(`✓ 已生成 ${count} 注`);
 
       state.drawing = false;
@@ -2310,11 +3363,14 @@
 
       playDoneSound();
       state.results = tickets;
+      state.previewIndex = 0;
       addToHistory(tickets);
+      dismissOnboard();
       renderResults();
+      showPreviewTicket(0);
       showToast(`✓ 已生成 ${tickets.length} 注`);
+      announce(`已生成 ${tickets.length} 注`);
 
-      // Scroll to results
       document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       state.drawing = false;
@@ -2323,10 +3379,11 @@
     }
 
     // ========== Copy handlers ==========
-    function handleCopyTicket(ticket) {
+    function handleCopyTicket(ticket, btn) {
       const text = formatCopyLine(GAMES[ticket.gameId], ticket.result);
       copyText(text).then(ok => {
         showToast(ok ? '✓ 已复制' : '复制失败，请手动复制');
+        if (ok && btn) markCopied(btn);
       });
     }
 
@@ -2353,7 +3410,7 @@
       return lines.join('\n');
     }
 
-    function handleCopyAll() {
+    function handleCopyAll(btn) {
       if (!state.results.length) return;
       const fc = buildGroupCopy('fc');
       const tc = buildGroupCopy('tc');
@@ -2361,19 +3418,46 @@
       if (fc) text += fc + '\n\n';
       if (tc) text += tc;
       text = text.trim() || state.results.map(t => formatCopyLine(GAMES[t.gameId], t.result)).join('\n');
-      copyText(text).then(ok => showToast(ok ? '✓ 已复制' : '复制失败，请手动复制'));
+      copyText(text).then(ok => {
+        showToast(ok ? '✓ 已复制' : '复制失败，请手动复制');
+        if (ok && btn) markCopied(btn);
+      });
     }
 
-    function handleCopyFc() {
+    function handleCopyFc(btn) {
       const text = buildGroupCopy('fc');
       if (!text) { showToast('当前无福彩结果'); return; }
-      copyText(text).then(ok => showToast(ok ? '✓ 已复制福彩' : '复制失败，请手动复制'));
+      copyText(text).then(ok => {
+        showToast(ok ? '✓ 已复制福彩' : '复制失败，请手动复制');
+        if (ok && btn) markCopied(btn);
+      });
     }
 
-    function handleCopyTc() {
+    function handleCopyTc(btn) {
       const text = buildGroupCopy('tc');
       if (!text) { showToast('当前无体彩结果'); return; }
-      copyText(text).then(ok => showToast(ok ? '✓ 已复制体彩' : '复制失败，请手动复制'));
+      copyText(text).then(ok => {
+        showToast(ok ? '✓ 已复制体彩' : '复制失败，请手动复制');
+        if (ok && btn) markCopied(btn);
+      });
+    }
+
+    function handleExportAllJson(btn) {
+      if (!state.results.length) {
+        showToast('当前无结果可导出');
+        return;
+      }
+      const payload = {
+        app: 'Lottery Lab',
+        version: VERSION,
+        exportedAt: new Date().toISOString(),
+        count: state.results.length,
+        certificates: state.results.map(ticketToExport)
+      };
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '');
+      downloadJson(`lottery-lab-${stamp}.json`, payload);
+      showToast('✓ 已导出 JSON');
+      if (btn) markCopied(btn);
     }
 
     function handleShareTicket(ticket) {
@@ -2412,12 +3496,15 @@
         'randomSource', 'samplingAlgorithm', 'randomByteCount', 'rawRandomBytes',
         'generatedAt', 'game', 'gameId', 'certificateId', 'numbers', 'version'
       ];
+      const missing = [];
       for (const key of required) {
         if (c[key] === undefined || c[key] === null || c[key] === '') {
-          return { ok: false, error: `缺少字段：${key}` };
+          missing.push(key);
         }
       }
-      // Normalize types
+      if (missing.length) {
+        return { ok: false, error: `缺少字段：${missing.join(', ')}`, missing };
+      }
       const normalized = {
         randomSource: String(c.randomSource),
         samplingAlgorithm: String(c.samplingAlgorithm),
@@ -2440,11 +3527,22 @@
 
       const recomputed = await computeCertHash(normalized);
       const match = recomputed === normalized.sha256.toLowerCase();
+
+      // Heuristic: if user also pasted a "tampered" sibling object with same id, try field hints
+      let hints = [];
+      if (!match) {
+        hints.push('任一参与哈希的字段被修改都会导致失败');
+        hints.push('请确认 generatedAt 使用 ISO（与哈希时一致），不要用本地显示时间');
+        if (normalized.numbers) hints.push(`当前号码字段：${normalized.numbers}`);
+        if (normalized.certificateId) hints.push(`凭证 ID：${normalized.certificateId}`);
+      }
+
       return {
         ok: match,
         expected: normalized.sha256.toLowerCase(),
         actual: recomputed,
         data: normalized,
+        hints,
         error: match ? null : '哈希不匹配：凭证数据可能被篡改或损坏'
       };
     }
@@ -2463,10 +3561,18 @@
         }
       }
 
-      // 2) Whole text is JSON
-      if (trimmed.startsWith('{')) {
+      // 2) Whole text is JSON object or export bundle
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
         try {
-          return JSON.parse(trimmed);
+          const obj = JSON.parse(trimmed);
+          if (Array.isArray(obj)) {
+            return obj[0] || { __parseError: 'JSON 数组为空' };
+          }
+          if (obj.certificates && Array.isArray(obj.certificates) && obj.certificates.length) {
+            return obj.certificates[0];
+          }
+          if (obj.sha256 || obj.certificateId) return obj;
+          return { __parseError: 'JSON 中未找到可验证的凭证字段' };
         } catch (e) {
           return { __parseError: 'JSON 解析失败：' + e.message };
         }
@@ -2538,8 +3644,12 @@
           <span class="cert-value mono">${c.certificateId}</span>
         </div>
         <div class="cert-row">
-          <span class="cert-label">生成时间</span>
-          <span class="cert-value">${formatDateTime(new Date(c.generatedAt))}</span>
+          <span class="cert-label">生成时间（本地显示）</span>
+          <span class="cert-value">${formatDateTime(new Date(c.generatedAt))}<span class="tz-tag">本地</span></span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">生成时间（UTC / ISO）</span>
+          <span class="cert-value mono">${c.generatedAt}</span>
         </div>
         <div class="cert-row">
           <span class="cert-label">号码</span>
@@ -2593,7 +3703,7 @@
         const result = await verifyCertificateData(state.currentCert.cert);
         if (result.ok) {
           statusEl.className = 'cert-verify-status visible ok';
-          statusEl.textContent = '✓ 完整性校验通过 · 哈希一致';
+          statusEl.textContent = '✓ 完整性校验通过 · 哈希一致 · 非公证';
           if (!silent) showToast('✓ 凭证验证通过');
         } else {
           statusEl.className = 'cert-verify-status visible fail';
@@ -2631,7 +3741,8 @@
         JSON.stringify(exportObj, null, 2),
         '---END CERT JSON---',
         '',
-        '仅供技术演示与娱乐使用 · 可用本应用「验证凭证」校验完整性'
+        '仅供技术演示与娱乐使用 · 可用本应用「验证凭证」校验完整性',
+        '说明：验证仅证明字段与 SHA-256 一致，不构成公证，也不证明随机源本身。'
       ].join('\n');
     }
 
@@ -2670,28 +3781,74 @@
         `;
         showToast('✓ 凭证验证通过');
       } else {
+        const hintsHtml = (result.hints || []).map(h => `<div class="diff-field">${h}</div>`).join('');
         box.className = 'verify-result-box visible fail';
         box.innerHTML = `
           <div class="verify-result-title">✗ 凭证无效</div>
           <div style="margin-bottom:8px;">${result.error || '哈希不匹配'}</div>
           ${result.expected ? `<div class="verify-result-detail">声明哈希：${result.expected}</div>` : ''}
           ${result.actual ? `<div class="verify-result-detail">计算哈希：${result.actual}</div>` : ''}
+          ${hintsHtml ? `<div style="margin-top:10px;">${hintsHtml}</div>` : ''}
+          <div class="verify-result-detail" style="margin-top:8px;color:var(--text-muted);">验证只检查字段完整性，不证明随机过程本身。</div>
         `;
         showToast('✗ 凭证验证失败');
       }
     }
 
-    // ========== Sheets ==========
+    function handleCertFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('verifyInput').value = String(reader.result || '');
+        showToast('✓ 已载入文件');
+        runVerifyFromInput();
+      };
+      reader.onerror = () => showToast('读取文件失败');
+      reader.readAsText(file);
+    }
+
+    // ========== Sheets + focus trap ==========
+    function trapFocus(sheet) {
+      if (focusTrapCleanup) focusTrapCleanup();
+      const focusable = sheet.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const handler = (e) => {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+      sheet.addEventListener('keydown', handler);
+      setTimeout(() => first.focus(), 50);
+      focusTrapCleanup = () => {
+        sheet.removeEventListener('keydown', handler);
+        focusTrapCleanup = null;
+      };
+    }
+
     function openSheet(id) {
       document.querySelectorAll('.sheet').forEach(s => {
         if (s.id !== id) s.classList.remove('visible');
       });
       document.getElementById('overlay').classList.add('visible');
-      document.getElementById(id).classList.add('visible');
+      const sheet = document.getElementById(id);
+      sheet.classList.add('visible');
       document.body.style.overflow = 'hidden';
+      trapFocus(sheet);
     }
 
     function closeSheets() {
+      if (focusTrapCleanup) focusTrapCleanup();
       document.getElementById('overlay').classList.remove('visible');
       document.querySelectorAll('.sheet').forEach(s => s.classList.remove('visible'));
       document.body.style.overflow = '';
@@ -2723,43 +3880,93 @@
       Object.keys(groups).forEach(label => {
         html += `<div class="history-group-title">${label}</div>`;
         groups[label].forEach(entry => {
-          const first = entry.tickets[0];
           const count = entry.tickets.length;
           const games = [...new Set(entry.tickets.map(t => t.gameName))].join(' · ');
           const preview = entry.tickets.slice(0, 2).map(t => t.numbersStr).join(' ｜ ');
           const time = formatTime(new Date(entry.time));
+          const expanded = state.expandedHistoryId === entry.id;
+          let detail = '';
+          if (expanded) {
+            detail = `<div class="history-item-expanded">` + entry.tickets.map((t, ti) => `
+              <div class="history-ticket-row">
+                <div class="history-ticket-nums">${t.gameName} · ${t.numbersStr}</div>
+                <div class="history-detail-ops">
+                  <button type="button" class="text-btn" data-haction="copy" data-hid="${entry.id}" data-ti="${ti}">复制</button>
+                  <button type="button" class="text-btn" data-haction="cert" data-hid="${entry.id}" data-ti="${ti}">凭证</button>
+                  <button type="button" class="text-btn" data-haction="export" data-hid="${entry.id}" data-ti="${ti}">JSON</button>
+                  <button type="button" class="text-btn" data-haction="share" data-hid="${entry.id}" data-ti="${ti}">分享</button>
+                </div>
+              </div>`).join('') + `
+              <div class="history-detail-ops" style="margin-top:8px;">
+                <button type="button" class="text-btn" data-haction="restore" data-hid="${entry.id}">恢复全部到结果页</button>
+              </div>
+            </div>`;
+          }
           html += `
-            <div class="history-item" data-id="${entry.id}">
+            <div class="history-item" data-id="${entry.id}" role="button" tabindex="0" aria-expanded="${expanded}">
               <div class="history-item-top">
                 <span class="history-item-game">${games}${count > 1 ? ' · ' + count + '注' : ''}</span>
                 <span class="history-item-time">${time}</span>
               </div>
               <div class="history-item-preview">${preview}${entry.tickets.length > 2 ? ' …' : ''}</div>
+              ${detail}
             </div>`;
         });
       });
       list.innerHTML = html;
 
       list.querySelectorAll('.history-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const entry = state.history.find(h => h.id === item.dataset.id);
+        item.addEventListener('click', e => {
+          if (e.target.closest('[data-haction]')) return;
+          const id = item.dataset.id;
+          state.expandedHistoryId = state.expandedHistoryId === id ? null : id;
+          renderHistory();
+        });
+        item.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            item.click();
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-haction]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const entry = state.history.find(h => h.id === btn.dataset.hid);
           if (!entry) return;
-          // Restore to results
-          state.results = entry.tickets.map(t => ({
-            ...t,
-            generatedAt: new Date(t.generatedAt)
-          }));
-          // Switch to home
-          switchView('home');
-          renderResults();
-          document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-          showToast('✓ 已恢复历史结果');
+          const action = btn.dataset.haction;
+          if (action === 'restore') {
+            state.results = entry.tickets.map(t => ({
+              ...t,
+              generatedAt: new Date(t.generatedAt)
+            }));
+            state.previewIndex = 0;
+            switchView('home');
+            renderResults();
+            showPreviewTicket(0);
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            showToast('✓ 已恢复历史结果');
+            return;
+          }
+          const ti = +btn.dataset.ti;
+          const t = entry.tickets[ti];
+          if (!t) return;
+          const ticket = { ...t, generatedAt: new Date(t.generatedAt) };
+          if (action === 'copy') handleCopyTicket(ticket, btn);
+          else if (action === 'cert') openCert(ticket);
+          else if (action === 'share') handleShareTicket(ticket);
+          else if (action === 'export') {
+            downloadJson(`${ticket.cert.certificateId || 'cert'}.json`, ticketToExport(ticket));
+            showToast('✓ 已导出 JSON');
+          }
         });
       });
     }
 
     function clearHistory() {
       state.history = [];
+      state.expandedHistoryId = null;
       saveStorage();
       renderHistory();
       showToast('✓ 历史已清空');
@@ -2776,18 +3983,64 @@
       if (view === 'settings') {
         document.getElementById('soundToggle').classList.toggle('on', state.sound);
         document.getElementById('soundToggle').setAttribute('aria-checked', state.sound);
+        const animToggle = document.getElementById('animToggle');
+        if (animToggle) {
+          animToggle.classList.toggle('on', state.anim);
+          animToggle.setAttribute('aria-checked', state.anim);
+        }
         document.getElementById('defaultCountSelect').value = state.defaultCount;
         applyTheme();
       }
       window.scrollTo(0, 0);
     }
 
+
+    const COMPARE_EXAMPLES = {
+      ssq: '03 08 14 19 27 31 + 09',
+      '3d': '582',
+      dlt: '03 08 14 19 27 + 02 09',
+      pl5: '58291'
+    };
+
+    function dismissOnboard() {
+      const tip = document.getElementById('onboardTip');
+      if (tip) tip.classList.remove('visible');
+      try { localStorage.setItem('lottery_lab_onboard_v1', '1'); } catch (e) {}
+    }
+
+    function maybeShowOnboard() {
+      try {
+        if (localStorage.getItem('lottery_lab_onboard_v1')) return;
+      } catch (e) {}
+      const tip = document.getElementById('onboardTip');
+      if (tip) tip.classList.add('visible');
+    }
+
+    function updateBackTop() {
+      const btn = document.getElementById('backTop');
+      if (!btn) return;
+      const show = window.scrollY > 320;
+      btn.classList.toggle('visible', show);
+    }
+
+    function fillCompareExample() {
+      const gameId = document.getElementById('compareGameSelect').value;
+      const ex = COMPARE_EXAMPLES[gameId] || '';
+      const input = document.getElementById('compareOfficialInput');
+      input.value = ex;
+      input.placeholder = '例：' + ex;
+      showToast('已填入格式示例（非真实开奖号）');
+    }
+
     // ========== Init ==========
+
     function init() {
       loadStorage();
       applyTheme();
       updateGameTabs();
       updateDrawArea();
+      maybeShowOnboard();
+      updateBackTop();
 
       // Set count buttons
       document.querySelectorAll('.count-btn').forEach(btn => {
@@ -2808,10 +4061,49 @@
           });
           if (state.category === 'fc') state.game = 'ssq';
           else if (state.category === 'tc') state.game = 'dlt';
+          else if (state.category === 'fair') state.game = 'fair';
           updateGameTabs();
           document.getElementById('ballsContainer').innerHTML = '<p class="placeholder-text">点击下方按钮开始摇奖</p>';
           document.getElementById('drawNote').textContent = '准备就绪';
         });
+      });
+
+      // Fair draw
+      document.getElementById('fairListInput').addEventListener('input', updateFairListMeta);
+      const fairDedupToggle = document.getElementById('fairDedupToggle');
+      if (fairDedupToggle) {
+        fairDedupToggle.classList.toggle('on', state.fairDedup);
+        fairDedupToggle.setAttribute('aria-checked', state.fairDedup);
+        fairDedupToggle.addEventListener('click', function () {
+          state.fairDedup = !state.fairDedup;
+          this.classList.toggle('on', state.fairDedup);
+          this.setAttribute('aria-checked', state.fairDedup);
+          saveStorage();
+          updateFairListMeta();
+        });
+      }
+      document.querySelectorAll('[data-fair-count]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.fairCount = +btn.dataset.fairCount;
+          document.querySelectorAll('[data-fair-count]').forEach(b => {
+            b.classList.toggle('active', +b.dataset.fairCount === state.fairCount);
+          });
+          updateFairListMeta();
+        });
+      });
+      document.getElementById('fairDrawBtn').addEventListener('click', doFairDraw);
+
+      // Compare
+      document.getElementById('compareBtn').addEventListener('click', () => {
+        openCompareSheet('current');
+      });
+      document.getElementById('historyCompareBtn').addEventListener('click', () => {
+        openCompareSheet('history');
+      });
+      document.getElementById('runCompareBtn').addEventListener('click', runCompare);
+      document.getElementById('clearCompareBtn').addEventListener('click', () => {
+        document.getElementById('compareOfficialInput').value = '';
+        document.getElementById('compareResultList').innerHTML = '';
       });
 
       // Draw button
@@ -2821,8 +4113,8 @@
 
       // Custom
       document.getElementById('addCustomBtn').addEventListener('click', () => {
-        if (state.customItems.length >= 8) {
-          showToast('最多添加 8 组');
+        if (state.customItems.length >= CUSTOM_MAX) {
+          showToast(`最多添加 ${CUSTOM_MAX} 组`);
           return;
         }
         state.customItems.push({ game: 'ssq', count: 1 });
@@ -2831,10 +4123,19 @@
 
       document.getElementById('customDrawBtn').addEventListener('click', doCustomDraw);
 
+      // Preview nav
+      document.getElementById('previewPrev').addEventListener('click', () => {
+        showPreviewTicket(state.previewIndex - 1);
+      });
+      document.getElementById('previewNext').addEventListener('click', () => {
+        showPreviewTicket(state.previewIndex + 1);
+      });
+
       // Results actions
-      document.getElementById('copyAllBtn').addEventListener('click', handleCopyAll);
-      document.getElementById('copyFcBtn').addEventListener('click', handleCopyFc);
-      document.getElementById('copyTcBtn').addEventListener('click', handleCopyTc);
+      document.getElementById('copyAllBtn').addEventListener('click', function () { handleCopyAll(this); });
+      document.getElementById('copyFcBtn').addEventListener('click', function () { handleCopyFc(this); });
+      document.getElementById('copyTcBtn').addEventListener('click', function () { handleCopyTc(this); });
+      document.getElementById('exportJsonBtn').addEventListener('click', function () { handleExportAllJson(this); });
 
       // Theme toggle (quick)
       document.getElementById('themeToggleBtn').addEventListener('click', () => {
@@ -2856,10 +4157,11 @@
       document.getElementById('overlay').addEventListener('click', closeSheets);
 
       // Cert actions
-      document.getElementById('copyCertBtn').addEventListener('click', () => {
+      document.getElementById('copyCertBtn').addEventListener('click', function () {
         if (!state.currentCert) return;
         copyText(formatCertText(state.currentCert)).then(ok => {
           showToast(ok ? '✓ 凭证已复制' : '复制失败，请手动复制');
+          if (ok) markCopied(this);
         });
       });
 
@@ -2889,6 +4191,31 @@
         document.getElementById('verifyInput').value = '';
         document.getElementById('verifyResultBox').className = 'verify-result-box';
         document.getElementById('verifyResultBox').innerHTML = '';
+      });
+
+      document.getElementById('pickCertFileBtn').addEventListener('click', () => {
+        document.getElementById('certFileInput').click();
+      });
+      document.getElementById('certFileInput').addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0];
+        handleCertFile(file);
+        e.target.value = '';
+      });
+
+      // Drag-drop on verify textarea
+      const verifyInput = document.getElementById('verifyInput');
+      verifyInput.addEventListener('dragover', e => {
+        e.preventDefault();
+        verifyInput.style.borderColor = 'var(--gold)';
+      });
+      verifyInput.addEventListener('dragleave', () => {
+        verifyInput.style.borderColor = '';
+      });
+      verifyInput.addEventListener('drop', e => {
+        e.preventDefault();
+        verifyInput.style.borderColor = '';
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) handleCertFile(file);
       });
 
       // Confirm clear
@@ -2921,6 +4248,15 @@
         if (state.sound) playDoneSound();
       });
 
+      // Animation toggle
+      document.getElementById('animToggle').addEventListener('click', function () {
+        state.anim = !state.anim;
+        this.classList.toggle('on', state.anim);
+        this.setAttribute('aria-checked', state.anim);
+        applyAnimPref();
+        saveStorage();
+      });
+
       // Default count
       document.getElementById('defaultCountSelect').addEventListener('change', function () {
         state.defaultCount = +this.value;
@@ -2943,10 +4279,43 @@
         if (state.theme === 'system') applyTheme();
       });
 
+
+      // Onboard / back top / compare example
+      const onboardDismiss = document.getElementById('onboardDismiss');
+      if (onboardDismiss) onboardDismiss.addEventListener('click', dismissOnboard);
+
+      const backTop = document.getElementById('backTop');
+      if (backTop) {
+        backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      }
+      window.addEventListener('scroll', updateBackTop, { passive: true });
+
+      const fillEx = document.getElementById('fillCompareExample');
+      if (fillEx) fillEx.addEventListener('click', fillCompareExample);
+      const compareGameSelect = document.getElementById('compareGameSelect');
+      if (compareGameSelect) {
+        compareGameSelect.addEventListener('change', () => {
+          const ex = COMPARE_EXAMPLES[compareGameSelect.value] || '';
+          const input = document.getElementById('compareOfficialInput');
+          if (input && !input.value) input.placeholder = '例：' + ex;
+        });
+      }
+
       // Keyboard: Escape closes sheet
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeSheets();
       });
+
+      // Lightweight offline cache when served over http(s)
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        const swCode = `self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open('ll-v1').then(c=>c.addAll([self.registration.scope])));});
+self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const copy=res.clone();caches.open('ll-v1').then(c=>c.put(e.request,copy));return res;}).catch(()=>caches.match(e.request))));});`;
+        try {
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
+        } catch (e) { /* ignore */ }
+      }
     }
 
     // Boot
