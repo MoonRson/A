@@ -1,651 +1,2961 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f4f7fb">
-<title>随机摇奖实验室 · 安全随机摇奖机</title>
-<style>
-:root{--bg:#f4f7fb;--card:rgba(255,255,255,.82);--text:#172033;--muted:#697386;--line:rgba(30,50,80,.10);--primary:#4263eb;--primary2:#6c7cff;--success:#16a36a;--warning:#e6a700;--danger:#e55353;--shadow:0 18px 50px rgba(31,47,80,.10);--radius:24px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);background:radial-gradient(circle at 10% 0%,rgba(90,120,255,.12),transparent 28%),radial-gradient(circle at 90% 10%,rgba(80,200,180,.10),transparent 25%),linear-gradient(135deg,#f8fafc,#eef3f9);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(rgba(30,50,80,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(30,50,80,.025) 1px,transparent 1px);background-size:28px 28px}
-button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}.app{width:min(1440px,calc(100% - 28px));margin:0 auto;padding:22px 0 40px}
-.topbar{position:sticky;top:10px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 18px;margin-bottom:20px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.78);backdrop-filter:blur(20px);box-shadow:0 10px 35px rgba(40,55,90,.08)}
-.brand{display:flex;align-items:center;gap:12px;min-width:210px}.brand-mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:white;font-weight:900;background:linear-gradient(135deg,var(--primary),#7d8cff);box-shadow:0 8px 20px rgba(66,99,235,.25)}.brand-title{font-weight:850}.brand-sub{font-size:11px;color:var(--muted);margin-top:2px}.tabs{display:flex;gap:5px;padding:4px;background:rgba(30,50,80,.055);border-radius:15px;overflow:auto}.tab{border:0;padding:9px 15px;border-radius:11px;background:transparent;color:var(--muted);white-space:nowrap;font-weight:700;transition:.2s}.tab.active{color:var(--text);background:white;box-shadow:0 4px 14px rgba(30,50,80,.09)}.secure-badge{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:750;white-space:nowrap}.secure-dot{width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 5px rgba(22,163,106,.10)}.secure-dot.bad{background:var(--danger);box-shadow:0 0 0 5px rgba(229,83,83,.10)}
-.page{display:none;animation:pageIn .3s ease}.page.active{display:block}@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.hero{display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;margin:10px 0 22px}.hero h1{margin:0 0 7px;font-size:clamp(28px,4vw,46px);letter-spacing:-1.8px}.hero p{margin:0;color:var(--muted);line-height:1.7}.hero-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
-.security-panel{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;padding:13px 16px;margin-bottom:20px;border:1px solid rgba(66,99,235,.12);background:rgba(255,255,255,.68);border-radius:17px}.security-title{font-weight:800;font-size:13px}.security-item{font-size:12px;color:var(--muted)}.security-item strong{color:var(--text)}.security-ok{color:var(--success)!important}
-.machine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.machine{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);backdrop-filter:blur(20px);box-shadow:var(--shadow)}.machine-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:21px 22px 10px}.machine-title{font-size:21px;font-weight:850}.machine-rule{color:var(--muted);font-size:12px;line-height:1.65;margin-top:5px}.status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);white-space:nowrap}.status-dot{width:9px;height:9px;border-radius:50%;background:#aab4c4}.status.running .status-dot{background:var(--warning);box-shadow:0 0 0 6px rgba(230,167,0,.10);animation:blink .8s infinite alternate}.status.done .status-dot{background:var(--success);box-shadow:0 0 0 6px rgba(22,163,106,.09)}@keyframes blink{to{opacity:.3;transform:scale(.75)}}
-.machine-body{padding:10px 22px 22px}.chamber{min-height:200px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px 15px;overflow:hidden;border:1px solid rgba(30,50,80,.09);border-radius:22px;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.98),rgba(232,238,247,.75)),#edf2f8;box-shadow:inset 0 1px 0 white,inset 0 -20px 40px rgba(40,55,80,.04)}.chamber.running{animation:machineShake .14s linear infinite alternate}@keyframes machineShake{from{transform:translateX(-1px) rotate(-.15deg)}to{transform:translateX(1px) rotate(.15deg)}}.chamber-ring{position:absolute;width:190px;height:190px;border-radius:50%;border:1px solid rgba(66,99,235,.08);box-shadow:0 0 0 18px rgba(66,99,235,.025),0 0 0 36px rgba(66,99,235,.018)}.balls{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;min-height:58px;max-width:560px}.ball{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:white;font-weight:900;font-size:15px;background:linear-gradient(145deg,#ff746f,#d92f3b);box-shadow:inset 4px 4px 9px rgba(255,255,255,.3),inset -5px -6px 10px rgba(100,0,10,.16),0 8px 14px rgba(80,50,60,.18);animation:ballPop .42s cubic-bezier(.18,1.5,.45,1)}.ball.blue{background:linear-gradient(145deg,#63a0ff,#2860cb)}@keyframes ballPop{0%{opacity:0;transform:translateY(25px) scale(.4)}70%{transform:translateY(-7px) scale(1.08)}100%{opacity:1;transform:none}}.plus{display:grid;place-items:center;width:26px;height:46px;font-weight:900;color:#7c8798}.roller-wrap{position:relative;z-index:2;display:flex;gap:9px;justify-content:center}.roller{width:52px;height:70px;overflow:hidden;display:grid;place-items:center;border-radius:13px;border:1px solid rgba(30,50,80,.1);background:linear-gradient(#fff,#e9eef5);box-shadow:inset 0 2px 8px rgba(30,50,80,.08),0 7px 13px rgba(30,50,80,.08);font-size:31px;font-weight:900}.roller.spinning{animation:rollerPulse .1s infinite alternate}@keyframes rollerPulse{to{transform:translateY(-2px)}}.chamber-caption{position:relative;z-index:2;color:#8993a3;font-size:11px;letter-spacing:.4px}
-.machine-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px}.control-group{display:flex;align-items:center;gap:8px}.control-group label{font-size:12px;color:var(--muted);font-weight:700}.select{min-width:82px;border:1px solid var(--line);border-radius:11px;padding:9px 10px;color:var(--text);background:white;outline:none}.btn{border:0;border-radius:12px;padding:10px 15px;font-weight:800;transition:.2s}.btn-primary{color:white;background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:0 8px 18px rgba(66,99,235,.2)}.btn-primary:hover:not(:disabled){transform:translateY(-1px)}.btn-soft{background:rgba(30,50,80,.06);color:var(--text)}.btn-small{font-size:11px;padding:8px 10px}
-.results{margin-top:17px}.results-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.results-title{font-weight:850;font-size:14px}.results-count{font-size:11px;color:var(--muted)}.result-list{display:grid;gap:9px}.empty{padding:20px;border:1px dashed rgba(30,50,80,.14);border-radius:15px;color:#8993a3;font-size:12px;text-align:center}.result-card{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.72);overflow:hidden;animation:cardIn .45s cubic-bezier(.2,.9,.3,1)}@keyframes cardIn{from{opacity:0;transform:translateY(15px) scale(.98)}to{opacity:1;transform:none}}.result-main{padding:13px 14px}.result-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}.result-name{font-weight:850;color:var(--text)}.result-value{margin:10px 0;font-size:17px;font-weight:900}.result-actions{display:flex;flex-wrap:wrap;gap:6px}.credential{display:none;padding:15px;border-top:1px solid var(--line);background:#f7f9fc}.credential.open{display:block}.credential pre{margin:0;white-space:pre-wrap;word-break:break-word;color:#445066;font:11px/1.7 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-.page-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px;flex-wrap:wrap}.toolbar-title h2{margin:0;font-size:25px}.toolbar-title p{margin:4px 0 0;color:var(--muted);font-size:12px}.custom-grid,.today-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.choice-card,.today-card{border:1px solid var(--line);border-radius:20px;padding:19px;background:var(--card);box-shadow:var(--shadow)}.choice-name{font-weight:850;font-size:17px}.choice-rule{font-size:11px;color:var(--muted);line-height:1.6;margin:5px 0 15px}.stepper{display:flex;align-items:center;justify-content:space-between;gap:10px}.step-btn{width:36px;height:36px;border:0;border-radius:11px;background:rgba(66,99,235,.09);color:var(--primary);font-size:20px;font-weight:800}.step-value{min-width:40px;text-align:center;font-weight:900;font-size:20px}.custom-summary{margin:18px 0;display:flex;justify-content:space-between;align-items:center;gap:15px;padding:17px 19px;border-radius:18px;background:rgba(255,255,255,.72);border:1px solid var(--line)}.summary-number{font-size:26px;font-weight:900}.summary-label{font-size:11px;color:var(--muted)}.today-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.today-date{padding:22px;margin-bottom:18px;border-radius:22px;color:white;background:linear-gradient(135deg,#27375d,#4d65a8);box-shadow:0 16px 35px rgba(39,55,93,.2)}.today-date .date{font-size:27px;font-weight:900}.today-date .weekday{opacity:.72;margin-top:4px}.today-card-head{display:flex;align-items:center;justify-content:space-between}.today-card h3{margin:0;font-size:17px}.today-select{margin-top:14px;width:100%}.notice{margin-top:28px;padding:16px 18px;border:1px solid rgba(30,50,80,.08);border-radius:16px;color:#697386;background:rgba(255,255,255,.58);font-size:11px;line-height:1.8}.toast{position:fixed;z-index:100;left:50%;bottom:28px;transform:translate(-50%,20px);padding:11px 16px;color:white;background:rgba(24,32,48,.92);border-radius:12px;box-shadow:0 12px 35px rgba(0,0,0,.18);font-size:12px;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.sound-toggle{display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:11px;background:white;color:var(--muted);font-size:11px;font-weight:800}
-@media(max-width:1050px){.custom-grid{grid-template-columns:repeat(2,1fr)}.today-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:850px){.topbar{align-items:flex-start;flex-wrap:wrap}.brand{min-width:auto}.tabs{order:3;width:100%}.secure-badge{margin-left:auto}.machine-grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.hero-actions{justify-content:flex-start}}@media(max-width:600px){.app{width:min(100% - 16px,1440px);padding-top:8px}.topbar{top:5px;border-radius:17px;padding:11px}.brand-mark{width:37px;height:37px;border-radius:12px}.brand-sub{display:none}.secure-badge{font-size:10px}.hero h1{font-size:30px}.security-panel{gap:8px 14px}.machine-head,.machine-body{padding-left:15px;padding-right:15px}.chamber{min-height:180px}.ball{width:39px;height:39px;font-size:13px}.roller{width:43px;height:62px;font-size:27px}.machine-controls{align-items:stretch;flex-direction:column}.control-group{justify-content:space-between}.machine-controls .btn{width:100%}.custom-grid,.today-grid{grid-template-columns:1fr}.custom-summary{align-items:stretch;flex-direction:column}.custom-summary .btn{width:100%}.today-date .date{font-size:22px}.result-value{font-size:15px}}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="安全随机号码生成与可验证随机凭证工具，仅供技术演示与娱乐使用。" />
+  <meta name="theme-color" content="#F7F3ED" />
+  <title>Lottery Lab · 随机摇奖实验室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F7F3ED;
+      --bg-card: #FFFFFF;
+      --bg-elevated: #FBF9F6;
+      --text: #2C2C2C;
+      --text-secondary: #6B6B6B;
+      --text-muted: #9A9A9A;
+      --cinnabar: #C75B39;
+      --cinnabar-soft: rgba(199, 91, 57, 0.12);
+      --stone-blue: #3E6B89;
+      --stone-blue-soft: rgba(62, 107, 137, 0.12);
+      --gold: #C9A96E;
+      --gold-soft: rgba(201, 169, 110, 0.15);
+      --gold-line: rgba(201, 169, 110, 0.45);
+      --border: rgba(44, 44, 44, 0.08);
+      --border-strong: rgba(44, 44, 44, 0.14);
+      --shadow: 0 2px 12px rgba(44, 44, 44, 0.06);
+      --shadow-lg: 0 8px 32px rgba(44, 44, 44, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-full: 9999px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --header-h: 56px;
+      --nav-h: 64px;
+      --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+      --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-/* ===== 随机摇奖实验室 Mobile 2.0 ===== */
-:root{--bg:#f3f1ed;--card:rgba(255,255,255,.86);--text:#17191f;--muted:#747985;--line:rgba(23,25,31,.09);--primary:#17191f;--gold:#bd9650;--success:#36a875;--radius:26px}
-body{background:radial-gradient(circle at 50% -10%,rgba(189,150,80,.13),transparent 34%),linear-gradient(180deg,#f8f6f2 0%,#eef0f3 100%);padding-bottom:calc(74px + env(safe-area-inset-bottom))}
-body:before{background-size:32px 32px;opacity:.16}
-.app{width:min(100% - 20px,760px);padding:10px 0 30px}
-.topbar{position:relative;top:auto;margin-bottom:13px;padding:10px 12px;border-radius:20px;background:rgba(255,255,255,.78);box-shadow:0 10px 30px rgba(23,25,31,.07)}
-.brand{min-width:auto}.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#252932,#111318);box-shadow:0 7px 18px rgba(0,0,0,.16)}
-.brand-title{font-size:14px}.brand-sub{font-size:9px}
-.tabs{display:flex;position:fixed;left:10px;right:10px;bottom:calc(9px + env(safe-area-inset-bottom));z-index:50;height:58px;padding:5px;border:1px solid rgba(23,25,31,.08);border-radius:19px;background:rgba(255,255,255,.91);backdrop-filter:blur(22px);box-shadow:0 14px 40px rgba(23,25,31,.16)}
-.tab{flex:1;padding:6px 5px;font-size:11px;border-radius:14px}.tab.active{color:#fff;background:#17191f;box-shadow:0 5px 15px rgba(23,25,31,.18)}
-.secure-badge{font-size:9px}.secure-dot{width:7px;height:7px}
-.hero{display:block;margin:14px 2px 14px}.hero h1{font-size:30px;letter-spacing:-1.4px;margin-bottom:4px}.hero p{font-size:11px;line-height:1.55}.hero-actions{margin-top:12px;justify-content:stretch}.hero-actions .btn,.hero-actions .sound-toggle{flex:1;justify-content:center}
-.security-panel{padding:10px 12px;margin-bottom:13px;border-radius:15px;gap:5px 11px}.security-title{font-size:11px}.security-item{font-size:9px}
-.machine-grid{grid-template-columns:1fr;gap:14px}.machine{border-radius:25px;box-shadow:0 13px 35px rgba(23,25,31,.09)}
-.machine-head{padding:17px 16px 9px}.machine-title{font-size:18px}.machine-rule{font-size:10px;max-width:270px}.machine-body{padding:8px 13px 15px}
-.chamber{min-height:235px;border-radius:21px;padding:20px 10px;background:radial-gradient(circle at 50% 20%,#fff,#e9edf1)}
-.chamber-ring{width:205px;height:205px}
-.balls{gap:8px;max-width:330px}.ball{width:43px;height:43px;font-size:13px;box-shadow:inset 3px 3px 8px rgba(255,255,255,.3),inset -4px -5px 9px rgba(100,0,10,.16),0 6px 12px rgba(80,50,60,.16)}
-.roller-wrap{gap:7px}.roller{width:48px;height:68px;font-size:29px}
-.machine-controls{margin-top:11px;gap:8px}.control-group{width:100%;justify-content:space-between}.select{min-width:92px;padding:10px 12px;border-radius:12px;background:#fff}
-.machine-controls .btn{width:100%;padding:13px 16px;border-radius:14px;background:linear-gradient(145deg,#252932,#111318);box-shadow:0 8px 18px rgba(23,25,31,.16)}
-.results{margin-top:14px}.results-header{margin-bottom:8px}.results-title{font-size:12px}.result-card{border-radius:15px}.result-main{padding:12px}.result-top{font-size:9px}.result-value{font-size:16px;letter-spacing:.1px;margin:8px 0 10px}.result-actions{gap:5px}.btn-small{font-size:10px;padding:8px 9px;border-radius:10px}
-.page-toolbar{margin:13px 2px 13px}.toolbar-title h2{font-size:23px}.toolbar-title p{font-size:10px}.page-toolbar>.btn{font-size:10px}
-.custom-grid,.today-grid{grid-template-columns:1fr;gap:9px}.choice-card,.today-card{padding:15px;border-radius:19px;box-shadow:0 8px 24px rgba(23,25,31,.06)}
-.choice-name{font-size:15px}.choice-rule{font-size:10px;margin:4px 0 12px}.step-btn{width:40px;height:40px;border-radius:12px}.step-value{font-size:19px}
-.custom-summary{margin:12px 0;padding:14px;border-radius:18px}.summary-number{font-size:23px}.summary-label{font-size:10px}.custom-summary .btn{width:100%;padding:13px;border-radius:14px}
-.today-date{padding:18px;margin-bottom:12px;border-radius:20px;background:linear-gradient(145deg,#20242d,#4b505a);box-shadow:0 12px 28px rgba(23,25,31,.15)}.today-date .date{font-size:22px}.today-date .weekday{font-size:11px}.today-card h3{font-size:15px}.today-select{margin-top:10px;padding:11px}
-.notice{margin-top:18px;padding:13px 14px;font-size:9px;line-height:1.7;border-radius:14px}
-.toast{bottom:calc(80px + env(safe-area-inset-bottom));font-size:11px}
-@media(min-width:700px){.app{width:min(100% - 28px,1100px)}.tabs{position:static;height:auto;border:0;box-shadow:none;background:rgba(30,50,80,.055)}.tab{flex:none}.machine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.custom-grid{grid-template-columns:repeat(2,1fr)}.today-grid{grid-template-columns:repeat(3,1fr)}body{padding-bottom:0}}
+    [data-theme="dark"] {
+      --bg: #0D1013;
+      --bg-card: #15191D;
+      --bg-elevated: #1A1F24;
+      --text: #ECECEC;
+      --text-secondary: #9DA4AA;
+      --text-muted: #6B737A;
+      --cinnabar: #C8755C;
+      --cinnabar-soft: rgba(200, 117, 92, 0.15);
+      --stone-blue: #6F9AAF;
+      --stone-blue-soft: rgba(111, 154, 175, 0.15);
+      --gold: #D3AD69;
+      --gold-soft: rgba(211, 173, 105, 0.12);
+      --gold-line: rgba(211, 173, 105, 0.4);
+      --border: rgba(236, 236, 236, 0.08);
+      --border-strong: rgba(236, 236, 236, 0.14);
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
 
-/* =========================================================
-   随机摇奖实验室 3.0 — 极简随机工具 / MOBILE FIRST
-   ========================================================= */
-:root{
-  --bg:#f7f6f2;
-  --paper:#fbfaf7;
-  --ink:#171717;
-  --muted:#8b8a84;
-  --line:#deddd7;
-  --gold:#b89a62;
-  --red:#c94a43;
-  --blue:#416f9e;
-  --green:#3c8b68;
-  --shadow:0 18px 45px rgba(20,20,18,.055);
-  --r:22px;
-}
-html{background:var(--bg)}
-body{
-  background:
-    radial-gradient(circle at 50% -18%,rgba(184,154,98,.075),transparent 35%),
-    var(--bg)!important;
-  color:var(--ink)!important;
-  padding-bottom:calc(82px + env(safe-area-inset-bottom))!important;
-  letter-spacing:-.01em;
-}
-body:before{display:none!important}
-.app{width:min(calc(100% - 28px),760px)!important;padding:14px 0 34px!important}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Header */
-.topbar{
-  position:relative!important;top:auto!important;
-  margin:0 0 20px!important;padding:7px 0 13px!important;
-  border:0!important;border-bottom:1px solid var(--line)!important;
-  border-radius:0!important;background:transparent!important;
-  box-shadow:none!important;backdrop-filter:none!important;
-}
-.brand{gap:10px!important}.brand-mark{
-  width:30px!important;height:30px!important;border-radius:9px!important;
-  background:var(--ink)!important;box-shadow:none!important;
-}
-.brand-mark *{display:none}
-.brand-mark:after{content:"随";font:600 13px/30px Georgia,serif;color:#fff}
-.brand-title{font:600 13px/1.1 system-ui,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase}
-.brand-sub{display:none!important}
-.secure-badge{
-  padding:5px 0!important;background:none!important;border:0!important;
-  color:var(--muted)!important;font-size:8px!important;letter-spacing:.06em;
-}
-.secure-dot{width:5px!important;height:5px!important;background:var(--green)!important}
+    html {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      scroll-behavior: smooth;
+    }
 
-/* Navigation */
-.tabs{
-  display:flex!important;position:fixed!important;left:12px!important;right:12px!important;
-  bottom:calc(10px + env(safe-area-inset-bottom))!important;z-index:60;
-  height:54px!important;padding:4px!important;
-  border:1px solid rgba(23,23,23,.08)!important;border-radius:18px!important;
-  background:rgba(251,250,247,.96)!important;backdrop-filter:blur(18px)!important;
-  box-shadow:0 15px 38px rgba(20,20,18,.12)!important;
-}
-.tab{
-  position:relative;flex:1!important;padding:7px 4px!important;
-  border-radius:14px!important;background:transparent!important;
-  color:#77766f!important;font-size:10px!important;font-weight:500!important;
-}
-.tab.active{color:var(--ink)!important;background:transparent!important;box-shadow:none!important}
-.tab.active:after{
-  content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
-  width:4px;height:4px;border-radius:50%;background:var(--gold);
-}
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
 
-/* Hero */
-.hero{display:block!important;margin:27px 1px 25px!important}
-.hero h1{
-  font:500 clamp(34px,10vw,50px)/.98 Georgia,"Times New Roman",serif!important;
-  letter-spacing:-.045em!important;margin:0 0 10px!important;
-}
-.hero p{font-size:11px!important;line-height:1.7!important;color:var(--muted)!important;max-width:310px}
-.hero-actions{margin-top:17px!important;gap:8px!important}
-.hero-actions .btn,.hero-actions .sound-toggle{
-  flex:0 0 auto!important;border-radius:12px!important;background:transparent!important;
-  color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none!important;
-  padding:9px 12px!important;font-size:10px!important;
-}
-.security-panel{
-  padding:11px 0!important;margin:0 0 22px!important;border:0!important;
-  border-top:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important;
-  border-radius:0!important;background:transparent!important;box-shadow:none!important;
-}
-.security-item{font-size:8px!important;color:var(--muted)!important}
+    /* Subtle paper texture for light mode */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.035;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(44,44,44,0.03) 2px, rgba(44,44,44,0.03) 3px),
+        repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(44,44,44,0.02) 3px, rgba(44,44,44,0.02) 4px),
+        radial-gradient(ellipse at 20% 30%, rgba(201,169,110,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(62,107,137,0.03) 0%, transparent 45%);
+    }
 
-/* Toolbar */
-.page-toolbar{margin:23px 1px 18px!important}
-.toolbar-title h2{
-  font:500 28px/1 Georgia,"Times New Roman",serif!important;
-  letter-spacing:-.035em!important;
-}
-.toolbar-title p{font-size:9px!important;color:var(--muted)!important;margin-top:5px}
-.page-toolbar>.btn{background:transparent!important;color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none!important;border-radius:11px!important}
+    [data-theme="dark"] body::before { opacity: 0.02; }
 
-/* Machines */
-.machine-grid{grid-template-columns:1fr!important;gap:18px!important}
-.machine{
-  border:1px solid var(--line)!important;border-radius:var(--r)!important;
-  background:rgba(251,250,247,.72)!important;box-shadow:var(--shadow)!important;
-  overflow:hidden;
-}
-.machine-head{padding:18px 17px 8px!important;border-bottom:0!important}
-.machine-title{font:500 19px/1.15 Georgia,"Times New Roman",serif!important}
-.machine-rule{font-size:9px!important;color:var(--muted)!important;margin-top:5px}
-.machine-body{padding:9px 13px 15px!important}
-.chamber{
-  min-height:245px!important;border:1px solid var(--line)!important;border-radius:17px!important;
-  background:var(--paper)!important;box-shadow:none!important;
-}
-.chamber-ring{width:208px!important;height:208px!important;border:1px solid rgba(184,154,98,.22)!important;box-shadow:none!important}
-.chamber-ring:before,.chamber-ring:after{opacity:.18!important}
-.balls{gap:8px!important;max-width:335px}
-.ball{
-  width:42px!important;height:42px!important;
-  border:1px solid rgba(0,0,0,.06)!important;
-  box-shadow:0 6px 13px rgba(20,20,18,.10),inset 2px 2px 4px rgba(255,255,255,.45)!important;
-  font-size:12px!important;
-}
-.ball.red{background:linear-gradient(145deg,#d95a53,#bd3f39)!important}
-.ball.blue{background:linear-gradient(145deg,#527fa8,#39648d)!important}
-.roller-wrap{gap:6px!important}
-.roller{
-  width:45px!important;height:65px!important;border-radius:9px!important;
-  background:#f3f1ec!important;border:1px solid var(--line)!important;
-  box-shadow:none!important;font-size:27px!important;color:var(--ink)!important;
-}
-.machine-controls{margin-top:10px!important}
-.control-group{font-size:9px!important;color:var(--muted)!important}
-.select{
-  min-width:82px!important;padding:9px 10px!important;border:1px solid var(--line)!important;
-  background:transparent!important;border-radius:10px!important;font-size:10px!important;
-}
-.machine-controls .btn{
-  width:100%!important;padding:13px 16px!important;border-radius:12px!important;
-  background:var(--ink)!important;color:#fff!important;box-shadow:none!important;
-  font-size:11px!important;letter-spacing:.02em;
-}
-.machine-controls .btn:disabled{opacity:.45}
+    #app {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
+    }
 
-/* Results = ticket */
-.results{margin-top:17px!important}
-.results-header{margin-bottom:8px!important}
-.results-title{font:500 11px/1 Georgia,serif!important}
-.result-card{
-  margin-bottom:8px!important;border:1px solid var(--line)!important;border-radius:15px!important;
-  background:var(--paper)!important;box-shadow:none!important;
-}
-.result-main{padding:13px!important}
-.result-top{font-size:8px!important;color:var(--muted)!important;letter-spacing:.04em}
-.result-value{
-  font:500 17px/1.3 Georgia,"Times New Roman",serif!important;
-  letter-spacing:.015em!important;margin:11px 0!important;
-}
-.result-actions{border-top:1px solid var(--line)!important;padding-top:9px!important}
-.btn-small{
-  font-size:9px!important;padding:7px 9px!important;border-radius:8px!important;
-  background:transparent!important;border:1px solid var(--line)!important;
-}
-.btn-small.primary{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important}
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
 
-/* Certificate */
-.certificate{
-  background:#f4f2ed!important;border-top:1px dashed #d4d1c8!important;
-  font-size:9px!important;color:#66655f!important;
-}
-.certificate code{font-size:8px!important;word-break:break-all}
+    .logo {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
 
-/* 自定义组合 / 今日开奖 */
-.custom-grid,.today-grid{grid-template-columns:1fr!important;gap:10px!important}
-.choice-card,.today-card{
-  padding:15px!important;border:1px solid var(--line)!important;border-radius:17px!important;
-  background:var(--paper)!important;box-shadow:none!important;
-}
-.choice-name,.today-card h3{font:500 15px/1.2 Georgia,serif!important}
-.choice-rule{font-size:9px!important;color:var(--muted)!important}
-.step-btn{
-  width:38px!important;height:38px!important;border-radius:10px!important;
-  border:1px solid var(--line)!important;background:transparent!important;box-shadow:none!important;
-}
-.step-value{font:500 18px Georgia,serif!important}
-.custom-summary{
-  margin:13px 0!important;padding:15px!important;border:1px solid var(--line)!important;
-  border-radius:17px!important;background:transparent!important;box-shadow:none!important;
-}
-.custom-summary .btn{width:100%;border-radius:12px!important;background:var(--ink)!important;box-shadow:none!important}
-.today-date{
-  padding:20px 18px!important;margin-bottom:13px!important;border-radius:19px!important;
-  background:var(--ink)!important;box-shadow:none!important;
-}
-.today-date .date{font:500 24px Georgia,serif!important}
-.today-date .weekday{font-size:9px!important;letter-spacing:.12em!important;text-transform:uppercase}
-.today-select{border:1px solid var(--line)!important;border-radius:10px!important;background:transparent!important}
-.notice{
-  margin-top:20px!important;padding:13px!important;border:1px solid var(--line)!important;
-  border-radius:13px!important;background:transparent!important;box-shadow:none!important;
-  color:var(--muted)!important;font-size:8px!important;line-height:1.8!important;
-}
+    .logo-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      line-height: 1.2;
+    }
 
-/* Toast */
-.toast{
-  bottom:calc(76px + env(safe-area-inset-bottom))!important;
-  background:var(--ink)!important;border-radius:11px!important;box-shadow:none!important;
-  font-size:10px!important;
-}
-@media(min-width:700px){
-  body{padding-bottom:0!important}
-  .app{width:min(calc(100% - 48px),1060px)!important}
-  .tabs{position:static!important;width:auto!important;height:auto!important;padding:0!important;
-    border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}
-  .tab{flex:none!important;padding:7px 14px!important}
-  .tab.active{background:#eeeae2!important;border-radius:11px!important}
-  .tab.active:after{display:none}
-  .machine-grid{grid-template-columns:repeat(2,1fr)!important}
-  .custom-grid{grid-template-columns:repeat(2,1fr)!important}
-  .today-grid{grid-template-columns:repeat(3,1fr)!important}
-}
-@media(max-width:350px){
-  .app{width:calc(100% - 20px)!important}
-  .ball{width:38px!important;height:38px!important}
-  .hero h1{font-size:31px!important}
-}
+    .logo-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      margin-top: 1px;
+    }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-/* 3.1 中文好运文案 */
-.luck-line{
-  margin:8px 0 0;
-  color:#9a896d;
-  font:400 11px/1.6 Georgia,"Times New Roman",serif;
-  letter-spacing:.02em;
-}
-.luck-line::before{content:"✦";font-family:system-ui;margin-right:6px;font-size:8px}
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), color var(--transition);
+    }
 
-.machine-controls .btn:not(:disabled)::after{content:" · 祝你好运";font-weight:400;opacity:.65}
+    .icon-btn:hover, .icon-btn:focus-visible {
+      background: var(--gold-soft);
+      color: var(--gold);
+      outline: none;
+    }
 
-/* 3.2 中文品牌清理：彻底移除 ENGINE 英文残留 */
-.engine,.engine-label,.engine-text,[data-engine],.lottery-engine{display:none!important}
+    .icon-btn:active { transform: scale(0.94); }
 
-/* 3.3 复制增强：福彩 / 体彩独立复制 */
-.hero-actions .btn-soft{white-space:nowrap}
+    .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
-/* =========================================================
-   LOTTERY LAB 4.0 — 极简奢华 / Mobile First
-   ========================================================= */
-:root{
- --bg:#f7f5ef;--paper:#fcfbf8;--ink:#151515;--muted:#8d8a82;
- --line:#dfddd5;--gold:#b89a62;--red:#c94a43;--blue:#416f9e;
- --green:#3d8b69;--shadow:0 18px 50px rgba(20,18,14,.055);
-}
-*{-webkit-tap-highlight-color:transparent}
-body{
- background:radial-gradient(circle at 50% -12%,rgba(184,154,98,.09),transparent 33%),var(--bg)!important;
-}
-.app{width:min(calc(100% - 28px),760px)!important}
-.topbar{border-bottom:1px solid var(--line)!important;margin-bottom:8px!important}
-.brand-mark{background:var(--ink)!important;border-radius:10px!important}
-.brand-title{font-size:12px!important;letter-spacing:.11em!important}
-.hero{margin:34px 1px 28px!important}
-.hero h1{font-size:clamp(38px,11vw,56px)!important;line-height:.94!important}
-.hero p{font-size:10px!important;max-width:330px}
-.luck-line{
- color:var(--gold)!important;font:400 11px/1.7 Georgia,serif!important;
- margin-top:10px!important;min-height:19px;
-}
-.hero-actions .btn,.hero-actions .sound-toggle{
- border:0!important;padding:7px 0!important;margin-right:14px;
- color:var(--muted)!important;font-size:9px!important;
-}
-.security-panel{margin-bottom:27px!important}
-.machine-grid{gap:22px!important}
-.machine{
- background:rgba(252,251,248,.9)!important;border-radius:24px!important;
- box-shadow:var(--shadow)!important;border:1px solid var(--line)!important;
-}
-.machine-head{padding:21px 18px 8px!important}
-.machine-title{font-size:20px!important}
-.machine-rule{font-size:9px!important;line-height:1.6}
-.chamber{
- min-height:270px!important;border:0!important;border-radius:18px!important;
- background:linear-gradient(180deg,#fdfcf9,#f2f0eb)!important;
-}
-.chamber-ring{width:224px!important;height:224px!important;border-color:rgba(184,154,98,.18)!important}
-.ball{width:44px!important;height:44px!important;font-size:12px!important}
-.roller{width:46px!important;height:68px!important;font-size:28px!important}
-.machine-controls .btn{
- border-radius:11px!important;letter-spacing:.06em!important;
-}
-.machine-controls .btn:not(:disabled)::after{content:"  ·  祝你好运"!important;opacity:.58}
-.results{margin-top:19px!important}
-.result-card{
- position:relative;overflow:hidden;background:var(--paper)!important;
- border-radius:16px!important;border:1px solid var(--line)!important;
- box-shadow:0 9px 24px rgba(20,18,14,.035)!important;
-}
-.result-card:before,.result-card:after{
- content:"";position:absolute;top:50%;width:11px;height:22px;
- transform:translateY(-50%);background:var(--bg);
- border:1px solid var(--line);border-radius:50%;
-}
-.result-card:before{left:-7px}.result-card:after{right:-7px}
-.result-main{padding:15px 16px!important}
-.result-value{font-size:18px!important;letter-spacing:.025em!important}
-.result-top{letter-spacing:.08em!important;text-transform:uppercase}
-.result-actions{padding-top:10px!important}
-.certificate{
- background:#f5f2eb!important;padding:14px!important;
- border-top:1px dashed #d0ccc1!important;
-}
-.certificate-title{font-family:Georgia,serif!important}
-.custom-summary .btn,.page-toolbar>.btn,.today-card .btn{letter-spacing:.04em!important}
-.today-date{
- background:linear-gradient(145deg,#171717,#292821)!important;
- position:relative;overflow:hidden;
-}
-.today-date:after{
- content:"";position:absolute;right:-45px;top:-55px;width:160px;height:160px;
- border:1px solid rgba(184,154,98,.25);border-radius:50%;
-}
-.notice{font-size:8px!important}
-.toast{border-radius:10px!important}
-@media(max-width:700px){
- .tabs{height:56px!important}
- .tab{font-size:9px!important}
-}
-@media(min-width:700px){
- .tabs .tab.active{background:#eee9df!important}
-}
-</style>
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 20px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 8px 0 4px;
+    }
+
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    .hero-sub {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Category tabs */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .cat-btn {
+      flex: 1;
+      max-width: 120px;
+      height: 40px;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+    }
+
+    .cat-btn.active {
+      border-color: var(--gold-line);
+      background: var(--gold-soft);
+      color: var(--text);
+      box-shadow: 0 0 0 1px var(--gold-line);
+    }
+
+    .cat-btn:hover:not(.active) {
+      border-color: var(--gold-line);
+      color: var(--text);
+    }
+
+    /* Game tabs */
+    .game-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .game-btn {
+      min-width: 88px;
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+    }
+
+    .game-btn.active {
+      border-color: var(--gold);
+      background: var(--gold-soft);
+      color: var(--text);
+      box-shadow: 0 0 12px var(--gold-soft);
+    }
+
+    .game-btn:hover:not(.active) {
+      border-color: var(--gold-line);
+    }
+
+    /* Count selector */
+    .count-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    .count-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .count-btn {
+      width: 48px;
+      height: 36px;
+      border: 1px solid var(--border);
+      background: transparent;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .count-btn.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    [data-theme="dark"] .count-btn.active {
+      background: var(--gold);
+      color: #0D1013;
+      border-color: var(--gold);
+    }
+
+    .count-btn:hover:not(.active) {
+      border-color: var(--gold-line);
+    }
+
+    /* Draw area */
+    .draw-area {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 16px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .draw-game-name {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    .draw-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .balls-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-height: 100px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .balls-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ball {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.25);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .ball.red { background: linear-gradient(145deg, #D46B4A, var(--cinnabar)); }
+    .ball.blue { background: linear-gradient(145deg, #5A8BA8, var(--stone-blue)); }
+    .ball.neutral { background: linear-gradient(145deg, #5A5A5A, #3A3A3A); color: #fff; }
+
+    [data-theme="dark"] .ball.red { background: linear-gradient(145deg, #D88A70, var(--cinnabar)); }
+    [data-theme="dark"] .ball.blue { background: linear-gradient(145deg, #7AABB8, var(--stone-blue)); }
+
+    .ball.pop { animation: ballPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    @keyframes ballPop {
+      0% { transform: scale(0.3); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .plus-sign {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin: 0 4px;
+      font-weight: 300;
+    }
+
+    .digit-card {
+      min-width: 40px;
+      height: 48px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .digit-card.pop { animation: ballPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    .placeholder-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Draw button */
+    .draw-btn {
+      width: 100%;
+      max-width: 280px;
+      height: 52px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--text);
+      color: var(--bg);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    [data-theme="dark"] .draw-btn {
+      background: var(--gold);
+      color: #0D1013;
+    }
+
+    .draw-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .draw-btn:active:not(:disabled) { transform: scale(0.97); }
+
+    .draw-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .draw-btn.loading {
+      pointer-events: none;
+    }
+
+    .draw-btn .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .draw-btn.loading .spinner { display: block; }
+    .draw-btn.loading .btn-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Progress steps */
+    .progress-steps {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      min-height: 24px;
+    }
+
+    .progress-steps.visible { display: flex; }
+
+    .progress-steps .step {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: all 0.3s ease;
+    }
+
+    .progress-steps .step.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .progress-steps .step.done { color: var(--gold); }
+
+    /* Results */
+    .results-section {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .results-section.visible { display: flex; }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+
+    .results-title {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .text-btn {
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+      white-space: nowrap;
+    }
+
+    .text-btn:hover {
+      border-color: var(--gold-line);
+      color: var(--text);
+      background: var(--gold-soft);
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      animation: fadeUp 0.35s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .result-game {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .result-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .result-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 12px;
+      justify-content: flex-start;
+    }
+
+    .result-numbers .ball { width: 36px; height: 36px; font-size: 14px; }
+    .result-numbers .digit-card { min-width: 32px; height: 40px; font-size: 18px; padding: 0 8px; }
+
+    .result-badges {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 11px;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge::before {
+      content: "✓";
+      font-size: 10px;
+    }
+
+    .result-ops {
+      display: flex;
+      gap: 8px;
+    }
+
+    .op-btn {
+      flex: 1;
+      height: 36px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .op-btn:hover {
+      border-color: var(--gold-line);
+      color: var(--text);
+      background: var(--gold-soft);
+    }
+
+    .op-btn:active { transform: scale(0.97); }
+
+    /* Custom panel */
+    .custom-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .custom-panel.visible { display: flex; }
+
+    .custom-title {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .custom-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .custom-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .custom-item select {
+      flex: 1;
+      height: 36px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 0 10px;
+      font-size: 14px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+
+    .custom-item .count-select {
+      width: 64px;
+      flex: none;
+    }
+
+    .custom-item .remove-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: color var(--transition);
+    }
+
+    .custom-item .remove-btn:hover { color: var(--cinnabar); }
+
+    .add-custom-btn {
+      height: 40px;
+      border: 1px dashed var(--border-strong);
+      background: transparent;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+    }
+
+    .add-custom-btn:hover {
+      border-color: var(--gold-line);
+      color: var(--gold);
+      background: var(--gold-soft);
+    }
+
+    /* Today section */
+    .today-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .today-title {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .today-content {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .today-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--gold-soft);
+      color: var(--gold);
+      margin-top: 6px;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px 16px 24px;
+      line-height: 1.6;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: calc(var(--nav-h) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: stretch;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: var(--font-sans);
+      transition: color var(--transition);
+      padding-top: 8px;
+    }
+
+    .nav-item.active { color: var(--gold); }
+    .nav-item:hover { color: var(--text); }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Views */
+    .view { display: none; }
+    .view.active { display: flex; flex-direction: column; gap: 24px; }
+
+    /* History view */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .history-group-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      padding: 4px 4px 0;
+    }
+
+    .history-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .history-item:hover {
+      border-color: var(--gold-line);
+      background: var(--bg-elevated);
+    }
+
+    .history-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .history-item-game {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .history-item-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .history-item-preview {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-clear-wrap {
+      text-align: center;
+      padding-top: 8px;
+    }
+
+    /* Settings view */
+    .settings-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      min-height: 52px;
+    }
+
+    .settings-item:last-child { border-bottom: none; }
+
+    .settings-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .settings-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .theme-options {
+      display: flex;
+      gap: 6px;
+    }
+
+    .theme-opt {
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+    }
+
+    .theme-opt.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    [data-theme="dark"] .theme-opt.active {
+      background: var(--gold);
+      color: #0D1013;
+      border-color: var(--gold);
+    }
+
+    .toggle {
+      width: 44px;
+      height: 26px;
+      border-radius: 13px;
+      background: var(--border-strong);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background var(--transition);
+      flex-shrink: 0;
+    }
+
+    .toggle.on { background: var(--gold); }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px;
+      left: 3px;
+      transition: transform var(--transition);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle.on::after { transform: translateX(18px); }
+
+    .settings-select {
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      cursor: pointer;
+    }
+
+    .about-info {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .about-info .ver {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Overlay / Bottom sheet */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 210;
+      background: var(--bg-card);
+      border-radius: 16px 16px 0 0;
+      max-height: 85dvh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      padding: 12px 20px calc(24px + var(--safe-bottom));
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+    }
+
+    .sheet.visible { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border-strong);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+
+    .sheet-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .cert-verified {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .cert-verified::before { content: "✓"; }
+
+    .cert-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cert-row:last-of-type { border-bottom: none; }
+
+    .cert-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .cert-value {
+      font-size: 14px;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .cert-value.mono {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .cert-hash {
+      cursor: pointer;
+      color: var(--stone-blue);
+    }
+
+    .cert-hash:hover { text-decoration: underline; }
+
+    .cert-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .cert-actions .op-btn { height: 44px; font-size: 14px; flex: 1; min-width: 100px; }
+
+    .cert-verify-status {
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .cert-verify-status.visible { display: block; }
+
+    .cert-verify-status.ok {
+      background: rgba(61, 140, 90, 0.12);
+      color: #2d7a4f;
+      border: 1px solid rgba(61, 140, 90, 0.25);
+    }
+
+    [data-theme="dark"] .cert-verify-status.ok {
+      background: rgba(90, 180, 120, 0.12);
+      color: #7dcea0;
+      border-color: rgba(90, 180, 120, 0.25);
+    }
+
+    .cert-verify-status.fail {
+      background: var(--cinnabar-soft);
+      color: var(--cinnabar);
+      border: 1px solid rgba(199, 91, 57, 0.3);
+    }
+
+    .cert-verify-status.pending {
+      background: var(--gold-soft);
+      color: var(--gold);
+      border: 1px solid var(--gold-line);
+    }
+
+    /* Verify sheet */
+    .verify-textarea {
+      width: 100%;
+      min-height: 160px;
+      max-height: 40vh;
+      padding: 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+
+    .verify-textarea:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 1px;
+    }
+
+    .verify-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+
+    .verify-result-box {
+      display: none;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .verify-result-box.visible { display: block; }
+
+    .verify-result-box.ok {
+      background: rgba(61, 140, 90, 0.1);
+      border: 1px solid rgba(61, 140, 90, 0.25);
+      color: var(--text);
+    }
+
+    .verify-result-box.fail {
+      background: var(--cinnabar-soft);
+      border: 1px solid rgba(199, 91, 57, 0.3);
+      color: var(--text);
+    }
+
+    .verify-result-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .verify-result-box.ok .verify-result-title { color: #2d7a4f; }
+    [data-theme="dark"] .verify-result-box.ok .verify-result-title { color: #7dcea0; }
+    .verify-result-box.fail .verify-result-title { color: var(--cinnabar); }
+
+    .verify-result-detail {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      word-break: break-all;
+    }
+
+    /* Confirm dialog */
+    .confirm-sheet .confirm-msg {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .confirm-actions button {
+      flex: 1;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all var(--transition);
+    }
+
+    .btn-cancel {
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn-cancel:hover { background: var(--bg-elevated); }
+
+    .btn-danger {
+      border: none;
+      background: var(--cinnabar);
+      color: #fff;
+    }
+
+    .btn-danger:hover { opacity: 0.9; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 300;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      max-width: 90vw;
+      box-shadow: var(--shadow-lg);
+    }
+
+    [data-theme="dark"] .toast {
+      background: var(--gold);
+      color: #0D1013;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Modal for desktop */
+    @media (min-width: 768px) {
+      .sheet {
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        top: 50%;
+        width: 420px;
+        max-height: 80vh;
+        border-radius: var(--radius);
+        transform: translate(-50%, -50%) scale(0.95);
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .sheet.visible {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .sheet-handle { display: none; }
+
+      .ball { width: 48px; height: 48px; font-size: 17px; }
+      .result-numbers .ball { width: 40px; height: 40px; font-size: 15px; }
+
+      .main { padding: 28px 24px 32px; }
+      .hero h1 { font-size: 26px; }
+    }
+
+    /* Focus visible */
+    button:focus-visible, select:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Hide scrollbar but keep scroll */
+    .sheet::-webkit-scrollbar { width: 4px; }
+    .sheet::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+  </style>
 </head>
 <body>
-<div class="app">
-<header class="topbar">
-<div class="brand"><div class="brand-mark">L</div><div><div class="brand-title">随机摇奖实验室</div><div class="brand-sub">安全随机摇奖机 · Local Random </div></div></div>
-<nav class="tabs" id="tabs"><button class="tab active" data-page="fc">福彩</button><button class="tab" data-page="tc">体彩</button><button class="tab" data-page="custom">自定义组合</button><button class="tab" data-page="today">今日开奖</button></nav>
-<div class="secure-badge"><span class="secure-dot" id="topSecureDot"></span><span id="topSecureText">安全随机源检测中</span></div>
-</header>
-<main>
-<section class="page active" id="page-fc">
-<div class="hero"><div><h1>福彩摇奖台</h1><p>双色球与 3D 独立摇奖。每一注都由浏览器安全随机源独立生成。</p></div><div class="hero-actions">
-  <button class="sound-toggle" id="soundBtn">🔇 音效关闭</button>
-  <button class="btn btn-soft" onclick="copyGrouped('fc')">📋 复制福彩全部</button>
-  <button class="btn btn-soft" onclick="shareGrouped('fc')">📤 分享福彩结果</button>
-</div></div>
-<div class="security-panel"></div>
-<div class="machine-grid"><div class="machine" id="machine-ssq"></div><div class="machine" id="machine-3d"></div></div>
-</section>
-<section class="page" id="page-tc">
-<div class="hero"><div><h1>体彩摇奖台</h1><p>大乐透与排列5独立摇奖，采用无偏差随机抽样。</p></div><div class="hero-actions">
-  <button class="btn btn-soft" onclick="copyGrouped('tc')">📋 复制体彩全部</button>
-  <button class="btn btn-soft" onclick="shareGrouped('tc')">📤 分享体彩结果</button>
-</div></div>
-<div class="security-panel"></div>
-<div class="machine-grid"><div class="machine" id="machine-dlt"></div><div class="machine" id="machine-pl5"></div></div>
-</section>
-<section class="page" id="page-custom">
-<div class="page-toolbar"><div class="toolbar-title"><h2>自定义组合</h2><p>自由选择四种玩法的生成数量，最多每种 5 注。</p></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button class="btn btn-soft" onclick="copyCurrentPage()">📋 复制本页结果</button>
-    <button class="btn btn-soft" onclick="shareCurrentPage()">📤 分享结果</button>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-title">Lottery Lab</span>
+        <span class="logo-sub">随机摇奖实验室</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题">
+          <svg id="themeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+        <button class="icon-btn" id="settingsBtn" aria-label="设置" title="设置">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- HOME VIEW -->
+      <div class="view active" id="view-home">
+        <div class="hero">
+          <h1>随机摇奖实验室</h1>
+          <p class="hero-sub">SECURE RANDOM · VERIFIABLE · FOR ENTERTAINMENT</p>
+          <p class="hero-desc">安全随机号码生成工具 · 仅供技术演示与娱乐使用</p>
+        </div>
+
+        <!-- Category -->
+        <div class="category-tabs" role="tablist">
+          <button class="cat-btn active" data-cat="fc" role="tab" aria-selected="true">福彩</button>
+          <button class="cat-btn" data-cat="tc" role="tab" aria-selected="false">体彩</button>
+          <button class="cat-btn" data-cat="custom" role="tab" aria-selected="false">自定义</button>
+        </div>
+
+        <!-- Game tabs (standard) -->
+        <div class="game-tabs" id="gameTabs">
+          <button class="game-btn active" data-game="ssq">双色球</button>
+          <button class="game-btn" data-game="3d">3D</button>
+        </div>
+
+        <!-- Custom panel -->
+        <div class="custom-panel" id="customPanel">
+          <div class="custom-title">自定义组合</div>
+          <div class="custom-items" id="customItems"></div>
+          <button class="add-custom-btn" id="addCustomBtn">+ 添加玩法</button>
+          <button class="draw-btn" id="customDrawBtn" style="max-width:100%;margin-top:4px;">
+            <span class="btn-text">🎲 生成组合</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+
+        <!-- Count (standard only) -->
+        <div class="count-section" id="countSection">
+          <span class="section-label">生成数量</span>
+          <div class="count-btns" role="group" aria-label="生成数量">
+            <button class="count-btn active" data-count="1">1注</button>
+            <button class="count-btn" data-count="2">2注</button>
+            <button class="count-btn" data-count="3">3注</button>
+            <button class="count-btn" data-count="4">4注</button>
+            <button class="count-btn" data-count="5">5注</button>
+          </div>
+        </div>
+
+        <!-- Draw area (standard) -->
+        <div class="draw-area" id="drawArea">
+          <div class="draw-game-name" id="drawGameName">双色球</div>
+          <div class="draw-note" id="drawNote">准备就绪</div>
+          <div class="balls-container" id="ballsContainer">
+            <p class="placeholder-text">点击下方按钮开始摇奖</p>
+          </div>
+          <div class="progress-steps" id="progressSteps"></div>
+          <button class="draw-btn" id="drawBtn" aria-label="开始摇奖">
+            <span class="btn-text">🎲 开始摇奖</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section" id="resultsSection">
+          <div class="results-header">
+            <span class="results-title">生成结果</span>
+            <div class="results-actions">
+              <button class="text-btn" id="copyAllBtn">复制全部</button>
+              <button class="text-btn" id="copyFcBtn">复制福彩</button>
+              <button class="text-btn" id="copyTcBtn">复制体彩</button>
+            </div>
+          </div>
+          <div id="resultsList"></div>
+        </div>
+
+        <!-- Today -->
+        <div class="today-section">
+          <div class="today-title">今日开奖</div>
+          <div class="today-content">
+            暂无实时开奖数据接入。<br />
+            本区域预留接口，便于后续扩展官方数据源。
+            <div class="today-tag">演示数据 · 非实时</div>
+          </div>
+        </div>
+
+        <p class="disclaimer">
+          Lottery Lab 仅供技术演示与娱乐使用。<br />
+          不提供购彩、投注、支付或中奖预测服务。<br />
+          请理性对待随机结果，勿用于任何形式的赌博。
+        </p>
+      </div>
+
+      <!-- HISTORY VIEW -->
+      <div class="view" id="view-history">
+        <div class="hero" style="padding-bottom:0;">
+          <h1 style="font-size:20px;">历史记录</h1>
+        </div>
+        <div class="history-list" id="historyList"></div>
+        <div class="history-clear-wrap" id="historyClearWrap" style="display:none;">
+          <button class="text-btn" id="clearHistoryBtn">清空历史</button>
+        </div>
+      </div>
+
+      <!-- SETTINGS VIEW -->
+      <div class="view" id="view-settings">
+        <div class="hero" style="padding-bottom:0;">
+          <h1 style="font-size:20px;">设置</h1>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-item">
+            <div>
+              <div class="settings-label">主题</div>
+              <div class="settings-desc">跟随系统 / 浅色 / 深色</div>
+            </div>
+            <div class="theme-options">
+              <button class="theme-opt" data-theme-opt="system">系统</button>
+              <button class="theme-opt" data-theme-opt="light">浅色</button>
+              <button class="theme-opt" data-theme-opt="dark">深色</button>
+            </div>
+          </div>
+          <div class="settings-item">
+            <div>
+              <div class="settings-label">音效</div>
+              <div class="settings-desc">摇奖过程与完成提示音</div>
+            </div>
+            <button class="toggle" id="soundToggle" role="switch" aria-checked="false" aria-label="音效开关"></button>
+          </div>
+          <div class="settings-item">
+            <div>
+              <div class="settings-label">默认生成数量</div>
+            </div>
+            <select class="settings-select" id="defaultCountSelect" aria-label="默认生成数量">
+              <option value="1">1注</option>
+              <option value="2">2注</option>
+              <option value="3">3注</option>
+              <option value="4">4注</option>
+              <option value="5">5注</option>
+            </select>
+          </div>
+          <div class="settings-item">
+            <div>
+              <div class="settings-label">历史记录</div>
+            </div>
+            <button class="text-btn" id="settingsClearHistory">清空历史</button>
+          </div>
+          <div class="settings-item">
+            <div>
+              <div class="settings-label">验证凭证</div>
+              <div class="settings-desc">粘贴凭证文本，校验 SHA-256 完整性</div>
+            </div>
+            <button class="text-btn" id="openVerifyBtn">验证</button>
+          </div>
+        </div>
+
+        <div class="about-info">
+          <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text);">Lottery Lab</div>
+          <div>随机摇奖实验室</div>
+          <div class="ver">版本 1.0.0</div>
+          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">
+            安全随机 · 可验证 · 仅供娱乐<br />
+            使用 crypto.getRandomValues + Rejection Sampling<br />
+            凭证支持本地 SHA-256 完整性校验<br />
+            所有数据仅保存在本地，不上传服务器
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom nav -->
+    <nav class="bottom-nav" role="navigation">
+      <button class="nav-item active" data-view="home" aria-label="结果">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span>结果</span>
+      </button>
+      <button class="nav-item" data-view="history" aria-label="历史">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>历史</span>
+      </button>
+      <button class="nav-item" data-view="settings" aria-label="设置">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <span>设置</span>
+      </button>
+    </nav>
   </div>
-</div>
-<div class="custom-grid" id="customChoices"></div>
-<div class="custom-summary"><div><div class="summary-number" id="customTotal">0</div><div class="summary-label">本次预计生成注数</div></div><button class="btn btn-primary" id="customGenerate" onclick="generate自定义组合()">生成自定义组合</button></div>
-<div class="results"><div class="results-header"><div class="results-title">生成结果</div><div class="results-count" id="customCount">还没有生成号码，先摇一注吧。</div></div><div class="result-list" id="customResults"><div class="empty">请选择玩法和注数后开始生成</div></div></div>
-</section>
-<section class="page" id="page-today">
-<div class="page-toolbar"><div class="toolbar-title"><h2>今日开奖台</h2><p>根据浏览器本地日期自动判断今日可生成玩法。</p></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button class="btn btn-soft" onclick="copyCurrentPage()">📋 复制本页结果</button>
-    <button class="btn btn-soft" onclick="shareCurrentPage()">📤 分享结果</button>
+
+  <!-- Overlay & Sheets -->
+  <div class="overlay" id="overlay"></div>
+
+  <div class="sheet" id="certSheet" role="dialog" aria-modal="true" aria-labelledby="certTitle">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="certTitle">随机凭证</div>
+    <div class="cert-verified" id="certVerifiedBadge">VERIFIED</div>
+    <div class="cert-verify-status" id="certLiveStatus"></div>
+    <div id="certContent"></div>
+    <div class="cert-actions">
+      <button class="op-btn" id="verifyThisCertBtn">验证此凭证</button>
+      <button class="op-btn" id="copyCertBtn">复制凭证</button>
+      <button class="op-btn" id="shareCertBtn">分享凭证</button>
+    </div>
   </div>
-</div>
-<div class="today-date"><div class="date" id="todayDate"></div><div class="weekday" id="todayWeekday"></div></div>
-<div class="today-grid" id="todayChoices"></div>
-<div class="custom-summary"><div><div class="summary-number" id="todayTotal">0</div><div class="summary-label">今日预计生成注数</div></div><button class="btn btn-primary" id="todayGenerate" onclick="generate今日开奖()">生成今日开奖</button></div>
-<div class="results"><div class="results-header"><div class="results-title">今日生成结果</div><div class="results-count" id="todayCount">还没有生成号码，先摇一注吧。</div></div><div class="result-list" id="todayResults"><div class="empty">选择注数后生成今日结果</div></div></div>
-</section>
-</main>
-<div class="notice"><strong>安全与娱乐说明：</strong>本工具仅供演示与娱乐，不作为国家彩票开奖依据。彩票开奖为独立随机事件，历史号码不能预测未来结果。本工具不读取历史开奖号码、不进行冷热号分析、不进行中奖预测。号码仅在当前浏览器本地生成。若浏览器不支持 Web Crypto 安全随机源，本工具不会使用 Math.random() 作为替代。</div>
-</div>
-<div class="toast" id="toast"></div>
-<script>
-"use strict";
-const GAMES={ssq:{id:"ssq",name:"双色球",type:"ball",rule:"红球 1–33 选 6 个；蓝球 1–16 选 1 个。",shortRule:"6 红 + 1 蓝",prefix:"双色球"},dlt:{id:"dlt",name:"大乐透",type:"ball",rule:"前区 1–35 选 5 个；后区 1–12 选 2 个。",shortRule:"5 前区 + 2 后区",prefix:"大乐透"},pl5:{id:"pl5",name:"排列5",type:"roller",rule:"5 位数字，每位独立从 0–9 随机生成，可重复。",shortRule:"5 位数字",prefix:"排列5"},"3d":{id:"3d",name:"3D",type:"roller",rule:"3 位数字，每位独立从 0–9 随机生成，可重复。",shortRule:"3 位数字",prefix:"3D"}};
-const WEEKDAY_GAMES={1:["dlt","pl5","3d"],2:["ssq","pl5","3d"],3:["dlt","pl5","3d"],4:["ssq","pl5","3d"],5:["pl5","3d"],6:["dlt","pl5","3d"],0:["ssq","pl5","3d"]};
-let activePage="fc",pageResults={fc:[],tc:[],custom:[],today:[]},customCounts={ssq:0,dlt:0,pl5:0,"3d":0},todayCounts={},soundEnabled=false,audioCtx=null,generationLock=false;
-const cryptoAvailable=typeof window.crypto!=="undefined"&&typeof window.crypto.getRandomValues==="function";
-function assertCrypto(){if(!cryptoAvailable)throw new Error("当前浏览器不支持 Web Crypto 安全随机源。为保证随机质量，本工具不会继续生成号码。")}
-class RandomAudit{constructor(){this.chunks=[];this.totalBytes=0}bytes(length){assertCrypto();const arr=new Uint32Array(Math.ceil(length/4));crypto.getRandomValues(arr);const bytes=new Uint8Array(arr.buffer).slice(0,length);this.chunks.push(bytesToHex(bytes));this.totalBytes+=bytes.length;return bytes}uint32(){const b=this.bytes(4);return((b[0]<<24)|(b[1]<<16)|(b[2]<<8)|b[3])>>>0}summary(){return this.chunks.join(" ")}}
-function bytesToHex(bytes){return Array.from(bytes).map(x=>x.toString(16).padStart(2,"0")).join("")}
-function uniformInt(maxExclusive,audit){if(!Number.isInteger(maxExclusive)||maxExclusive<=0)throw new Error("非法随机范围");const LIMIT=Math.floor(0x100000000/maxExclusive)*maxExclusive;while(true){const x=audit.uint32();if(x<LIMIT)return x%maxExclusive}}
-function sampleUnique(min,max,count,audit){const pool=[];for(let i=min;i<=max;i++)pool.push(i);for(let i=0;i<count;i++){const j=i+uniformInt(pool.length-i,audit);[pool[i],pool[j]]=[pool[j],pool[i]]}return pool.slice(0,count).sort((a,b)=>a-b)}
-function randomDigit(audit){return uniformInt(10,audit)}
-async function sha256(text){assertCrypto();const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));return Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,"0")).join("")}
-function randomHex(length){const a=new RandomAudit();let out="";while(out.length<length)out+=a.uint32().toString(16).padStart(8,"0");return out.slice(0,length).toUpperCase()}
-function generateRaw(gameId){const audit=new RandomAudit();let data,result;if(gameId==="ssq"){const red=sampleUnique(1,33,6,audit),blue=sampleUnique(1,16,1,audit)[0];data={red,blue};result=`双色球：${red.join(" ")} + ${blue}`}if(gameId==="dlt"){const front=sampleUnique(1,35,5,audit),back=sampleUnique(1,12,2,audit);data={front,back};result=`大乐透：${front.join(" ")} + ${back.join(" ")}`}if(gameId==="pl5"){const digits=Array.from({length:5},()=>randomDigit(audit));data={digits};result=`排列5：${digits.join("")}`}if(gameId==="3d"){const digits=Array.from({length:3},()=>randomDigit(audit));data={digits};result=`3D：${digits.join("")}`}return{gameId,game:GAMES[gameId].name,data,result,audit}}
-async function createCertificate(raw){const now=new Date(),pad=n=>String(n).padStart(2,"0"),local=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,stamp=`${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`,id="LOT-"+stamp+"-"+randomHex(6),base={version:"随机摇奖实验室 Certificate v1",id,game:raw.game,generatedAt:local,result:raw.result,randomSource:"Web Crypto API / crypto.getRandomValues",samplingAlgorithm:raw.gameId==="pl5"||raw.gameId==="3d"?"Rejection 采样方式（每一位独立均匀生成）":"Rejection 采样方式 + Fisher-Yates 局部洗牌（无偏差不重复抽样）",rawRandomBytes:raw.audit.summary(),randomByteCount:raw.audit.totalBytes,audit:"本凭证记录的是本次生成过程中网页实际从 crypto.getRandomValues() 获取并参与采样的数据。"},digest=await sha256(JSON.stringify(base));return{...base,sha256:digest}}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-function toast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove("show"),1900)}
-function setStatus(machine,status,text){const el=machine.querySelector(".status");el.className="status "+status;el.querySelector(".status-text").textContent=text}
-function machineTemplate(gameId){const g=GAMES[gameId];return `<div class="machine-head"><div><div class="machine-title">${g.name}</div><div class="machine-rule">${g.rule}</div></div><div class="status"><span class="status-dot"></span><span class="status-text">待机</span></div></div><div class="machine-body"><div class="chamber" id="${gameId}-chamber"><div class="chamber-ring"></div>${g.type==="ball"?`<div class="balls" id="${gameId}-display"></div>`:`<div class="roller-wrap" id="${gameId}-display"></div>`}<div class="chamber-caption">安全随机 摇奖中 </div></div><div class="machine-controls"><div class="control-group"><label>生成注数</label><select class="select" id="${gameId}-count"><option value="1">1 注</option><option value="5">5 注</option></select></div><button class="btn btn-primary" id="${gameId}-start" onclick="startMachine('${gameId}')">开始摇奖</button></div><div class="results"><div class="results-header"><div class="results-title">本次生成结果</div><div class="results-count" id="${gameId}-count-label">还没有生成号码，先摇一注吧。</div></div><div class="result-list" id="${gameId}-results"><div class="empty">点击“开始摇奖”启动机器</div></div></div></div>`}
-document.getElementById("machine-ssq").innerHTML=machineTemplate("ssq");document.getElementById("machine-3d").innerHTML=machineTemplate("3d");document.getElementById("machine-dlt").innerHTML=machineTemplate("dlt");document.getElementById("machine-pl5").innerHTML=machineTemplate("pl5");
-function ensureAudio(){if(!soundEnabled)return;if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}
-function beep(freq=500,duration=.05,type="sine",volume=.025){if(!soundEnabled)return;ensureAudio();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(volume,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}
-function playFinish(){beep(520,.06);setTimeout(()=>beep(680,.08),80);setTimeout(()=>beep(820,.12),170)}
-document.getElementById("soundBtn").addEventListener("click",()=>{soundEnabled=!soundEnabled;const b=document.getElementById("soundBtn");if(soundEnabled){ensureAudio();b.textContent="🔊 音效开启";beep(600,.07)}else b.textContent="🔇 音效关闭"});
-async function animateBallMachine(gameId,raw){const display=document.getElementById(`${gameId}-display`),chamber=document.getElementById(`${gameId}-chamber`);display.innerHTML="";chamber.classList.add("running");const add=async(value,blue=false)=>{await sleep(170);const b=document.createElement("div");b.className="ball"+(blue?" blue":"");b.textContent=value;display.appendChild(b);beep(350,.035,"sine",.015)};if(gameId==="ssq"){for(const n of raw.data.red)await add(n);const p=document.createElement("div");p.className="plus";p.textContent="+";display.appendChild(p);await add(raw.data.blue,true)}else{for(const n of raw.data.front)await add(n);const p=document.createElement("div");p.className="plus";p.textContent="+";display.appendChild(p);for(const n of raw.data.back)await add(n,true)}chamber.classList.remove("running")}
-async function animateRollerMachine(gameId,raw){const display=document.getElementById(`${gameId}-display`),chamber=document.getElementById(`${gameId}-chamber`);display.innerHTML="";chamber.classList.add("running");for(let i=0;i<raw.data.digits.length;i++){const r=document.createElement("div");r.className="roller spinning";display.appendChild(r);for(let j=0;j<11+i*4;j++){r.textContent=(j+i*3)%10;await sleep(32)}r.textContent=raw.data.digits[i];r.classList.remove("spinning");r.animate([{transform:"scale(.9)"},{transform:"scale(1.12)"},{transform:"scale(1)"}],{duration:280,easing:"cubic-bezier(.2,1.4,.4,1)"});beep(380+i*90,.05,"square",.018);await sleep(110)}chamber.classList.remove("running")}
-function escapeHtml(v){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
-function resultCard(item,index){const certJson=JSON.stringify(item.certificate,null,2);const cert=`RANDOM 查看凭证\n==============================\n\n玩法：\n${item.certificate.game}\n\n凭证编号：\n${item.certificate.id}\n\n生成时间：\n${item.certificate.generatedAt}\n\n本注开奖结果：\n${item.certificate.result}\n\n随机源：\n${item.certificate.randomSource}\n\n采样算法：\n${item.certificate.samplingAlgorithm}\n\n随机数消耗：\n${item.certificate.randomByteCount} bytes\n\n本注采样消耗的原始随机数序列：\n${item.certificate.rawRandomBytes}\n\nSHA-256 凭证摘要：\n${item.certificate.sha256}\n\n审计说明：\n${item.certificate.audit}\n\n版本：\n${item.certificate.version}`;return `<article class="result-card"><div class="result-main"><div class="result-top"><span><span class="result-name">${escapeHtml(item.game)}</span> · 第 ${index+1} 注</span><span>${escapeHtml(item.certificate.id)}</span></div><div class="result-value">${escapeHtml(item.result)}</div><div class="result-actions"><button class="btn btn-soft btn-small" onclick="copyText(${JSON.stringify(item.result)})">复制结果</button><button class="btn btn-soft btn-small" onclick="toggleCredential(this)">查看凭证</button><button class="btn btn-soft btn-small" onclick="copyText(${JSON.stringify(cert)})">复制凭证</button></div></div><div class="credential"><pre>${escapeHtml(cert)}</pre></div></article>`}
-function renderResults(cid,lid,items){const c=document.getElementById(cid),l=document.getElementById(lid);if(!items.length){c.innerHTML='<div class="empty">还没有生成号码，先摇一注吧。</div>';l.textContent="还没有生成号码，先摇一注吧。";return}c.innerHTML=items.map(resultCard).join("");l.textContent=`共 ${items.length} 注`}
-function toggleCredential(b){const c=b.closest(".result-card").querySelector(".credential");c.classList.toggle("open");b.textContent=c.classList.contains("open")?"收起凭证":"查看凭证"}
-async function startMachine(gameId){if(generationLock)return;assertCrypto();const machine=document.getElementById(`machine-${gameId}`),btn=document.getElementById(`${gameId}-start`),count=Number(document.getElementById(`${gameId}-count`).value);generationLock=true;btn.disabled=true;btn.textContent="摇奖中 · 好运正在路上";setStatus(machine,"running","摇奖中");const results=[];document.getElementById(`${gameId}-results`).innerHTML="";try{for(let i=0;i<count;i++){const raw=generateRaw(gameId);if(GAMES[gameId].type==="ball")await animateBallMachine(gameId,raw);else await animateRollerMachine(gameId,raw);const certificate=await createCertificate(raw);results.push({gameId,game:raw.game,result:raw.result,data:raw.data,certificate});renderResults(`${gameId}-results`,`${gameId}-count-label`,results);await sleep(220)}pageResults[gameId==="ssq"||gameId==="3d"?"fc":"tc"]=pageResults[gameId==="ssq"||gameId==="3d"?"fc":"tc"].concat(results);setStatus(machine,"done","完成");playFinish();toast(`已生成 ${count} 注，每注均有独立凭证`)}catch(err){toast(err.message||"生成失败");setStatus(machine,"","待机")}finally{btn.disabled=false;btn.textContent="开始摇奖";generationLock=false}}
-function init自定义组合(){document.getElementById("customChoices").innerHTML=Object.values(GAMES).map(g=>`<div class="choice-card"><div class="choice-name">${g.name}</div><div class="choice-rule">${g.shortRule}<br>${g.rule}</div><div class="stepper"><button class="step-btn" onclick="change自定义组合('${g.id}',-1)">−</button><div class="step-value" id="custom-${g.id}">0</div><button class="step-btn" onclick="change自定义组合('${g.id}',1)">+</button></div></div>`).join("");update自定义组合Total()}
-function change自定义组合(id,d){customCounts[id]=Math.max(0,Math.min(5,customCounts[id]+d));document.getElementById(`custom-${id}`).textContent=customCounts[id];update自定义组合Total()}
-function update自定义组合Total(){document.getElementById("customTotal").textContent=Object.values(customCounts).reduce((a,b)=>a+b,0)}
-async function generate自定义组合(){if(generationLock)return;assertCrypto();const total=Object.values(customCounts).reduce((a,b)=>a+b,0);if(!total){toast("请至少选择 1 注");return}const btn=document.getElementById("customGenerate");btn.disabled=true;btn.textContent="正在生成 · 好运正在路上";generationLock=true;const results=[];try{for(const id of ["ssq","dlt","pl5","3d"])for(let i=0;i<customCounts[id];i++){const raw=generateRaw(id),certificate=await createCertificate(raw);results.push({gameId:id,game:raw.game,result:raw.result,data:raw.data,certificate});renderResults("customResults","customCount",results);await sleep(100)}pageResults.custom=results;toast(`自定义组合完成，共 ${results.length} 注`)}catch(e){toast(e.message||"生成失败")}finally{btn.disabled=false;btn.textContent="生成自定义组合";generationLock=false}}
-function weekdayName(d){return["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][d]}
-function init今日开奖(){const now=new Date(),day=now.getDay(),games=WEEKDAY_GAMES[day];document.getElementById("todayDate").textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;document.getElementById("todayWeekday").textContent=weekdayName(day);todayCounts={};document.getElementById("todayChoices").innerHTML=games.map(id=>{todayCounts[id]=1;const g=GAMES[id];return `<div class="today-card"><div class="today-card-head"><h3>${g.name}</h3><span class="results-count">${g.shortRule}</span></div><select class="select today-select" onchange="change今日开奖('${id}',this.value)"><option value="1">1 注</option><option value="2">2 注</option><option value="3">3 注</option><option value="4">4 注</option><option value="5">5 注</option></select></div>`}).join("");update今日开奖Total()}
-function change今日开奖(id,v){todayCounts[id]=Number(v);update今日开奖Total()}
-function update今日开奖Total(){document.getElementById("todayTotal").textContent=Object.values(todayCounts).reduce((a,b)=>a+b,0)}
-async function generate今日开奖(){if(generationLock)return;assertCrypto();const total=Object.values(todayCounts).reduce((a,b)=>a+b,0);if(!total){toast("今日玩法至少需要生成 1 注");return}const btn=document.getElementById("todayGenerate");btn.disabled=true;btn.textContent="正在生成 · 好运正在路上";generationLock=true;const results=[];try{for(const id of Object.keys(todayCounts))for(let i=0;i<todayCounts[id];i++){const raw=generateRaw(id),certificate=await createCertificate(raw);results.push({gameId:id,game:raw.game,result:raw.result,data:raw.data,certificate});renderResults("todayResults","todayCount",results);await sleep(110)}pageResults.today=results;toast(`今日开奖生成完成，共 ${results.length} 注`)}catch(e){toast(e.message||"生成失败")}finally{btn.disabled=false;btn.textContent="生成今日开奖";generationLock=false}}
 
-/* ===== 复制 / 分享增强功能 ===== */
-function formatResults(items, title) {
-  if (!items || !items.length) return '';
-  const now = new Date().toLocaleString('zh-CN', { hour12: false });
-  let text = `${title}\n生成时间：${now}\n共 ${items.length} 注\n`;
-  text += '----------------------------------------\n';
-  items.forEach((item, idx) => {
-    text += `第 ${idx+1} 注：${item.result}\n`;
-  });
-  text += '----------------------------------------\n';
-  text += '本结果由随机摇奖实验室生成，仅作娱乐参考。';
-  return text;
-}
+  <div class="sheet" id="verifySheet" role="dialog" aria-modal="true" aria-labelledby="verifyTitle">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="verifyTitle">验证随机凭证</div>
+    <p class="verify-hint">
+      粘贴完整凭证文本（含 JSON 区块）或仅粘贴 CERT JSON。<br />
+      系统将按相同字段顺序重建载荷并重新计算 SHA-256，与凭证中的哈希比对。
+    </p>
+    <textarea class="verify-textarea" id="verifyInput" placeholder="在此粘贴凭证内容…" spellcheck="false" aria-label="凭证内容"></textarea>
+    <div class="verify-result-box" id="verifyResultBox"></div>
+    <div class="cert-actions">
+      <button class="op-btn" id="runVerifyBtn">开始验证</button>
+      <button class="op-btn" id="clearVerifyBtn">清空</button>
+    </div>
+  </div>
 
-function getPageItems() {
-  if (activePage === 'fc') return pageResults.fc || [];
-  if (activePage === 'tc') return pageResults.tc || [];
-  if (activePage === 'custom') return pageResults.custom || [];
-  if (activePage === 'today') return pageResults.today || [];
-  return [];
-}
+  <div class="sheet confirm-sheet" id="confirmSheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">确认操作</div>
+    <p class="confirm-msg" id="confirmMsg">确定要清空全部历史记录吗？此操作不可恢复。</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" id="confirmCancel">取消</button>
+      <button class="btn-danger" id="confirmOk">清空</button>
+    </div>
+  </div>
 
-function copyGrouped(group) {
-  const items = pageResults[group] || [];
-  if (!items.length) { toast('暂无结果，请先摇奖'); return; }
-  const title = group === 'fc' ? '福彩' : '体彩';
-  const text = formatResults(items, `${title}开奖结果`);
-  copyText(text);
-}
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-function shareGrouped(group) {
-  const items = pageResults[group] || [];
-  if (!items.length) { toast('暂无结果，请先摇奖'); return; }
-  const title = group === 'fc' ? '福彩' : '体彩';
-  const text = formatResults(items, `${title}开奖结果`);
-  if (navigator.share) {
-    navigator.share({ title: `${title}开奖结果`, text: text }).catch(() => {});
-  } else {
-    copyText(text);
-  }
-}
+  <script>
+  (function () {
+    'use strict';
 
-function copyCurrentPage() {
-  const items = getPageItems();
-  if (!items.length) { toast('还没有生成号码，先摇一注吧。'); return; }
-  const pageName = { fc:'福彩', tc:'体彩', custom:'自定义组合', today:'今日开奖' }[activePage] || '结果';
-  const text = formatResults(items, `${pageName}开奖结果`);
-  copyText(text);
-}
+    // ========== Constants ==========
+    const VERSION = '1.0.0';
+    const STORAGE_KEY = 'lottery_lab_v1';
+    const HISTORY_MAX = 50;
 
-function shareCurrentPage() {
-  const items = getPageItems();
-  if (!items.length) { toast('还没有生成号码，先摇一注吧。'); return; }
-  const pageName = { fc:'福彩', tc:'体彩', custom:'自定义组合', today:'今日开奖' }[activePage] || '结果';
-  const text = formatResults(items, `${pageName}开奖结果`);
-  if (navigator.share) {
-    navigator.share({ title: `${pageName}开奖结果`, text: text }).catch(() => {});
-  } else {
-    copyText(text);
-  }
-}
+    const GAMES = {
+      ssq: {
+        id: 'ssq',
+        name: '双色球',
+        category: 'fc',
+        code: 'SSQ',
+        type: 'balls',
+        red: { min: 1, max: 33, count: 6 },
+        blue: { min: 1, max: 16, count: 1 }
+      },
+      '3d': {
+        id: '3d',
+        name: '3D',
+        category: 'fc',
+        code: '3D',
+        type: 'digits',
+        length: 3
+      },
+      dlt: {
+        id: 'dlt',
+        name: '大乐透',
+        category: 'tc',
+        code: 'DLT',
+        type: 'balls',
+        front: { min: 1, max: 35, count: 5 },
+        back: { min: 1, max: 12, count: 2 }
+      },
+      pl5: {
+        id: 'pl5',
+        name: '排列5',
+        category: 'tc',
+        code: 'PL5',
+        type: 'digits',
+        length: 5
+      }
+    };
 
-/* ===== 修复移动端复制 - 同步优先 ===== */
-function copyText(text) {
-  if (!text) { toast("没有可复制的内容"); return false; }
+    const GAME_LIST = ['ssq', '3d', 'dlt', 'pl5'];
 
-  // 1. 同步尝试 execCommand（适用于移动端 file:// 及大多数场景）
-  try {
-    const ta = document.createElement("textarea");
-    ta.value = String(text);
-    ta.setAttribute("readonly", "");
-    ta.style.position = "fixed";
-    ta.style.left = "0";
-    ta.style.top = "0";
-    ta.style.width = "200px";
-    ta.style.height = "200px";
-    ta.style.padding = "0";
-    ta.style.border = "0";
-    ta.style.opacity = "0";
-    ta.style.zIndex = "-1";
-    ta.style.background = "transparent";
-    ta.style.pointerEvents = "none";
-    ta.style.userSelect = "text";
-    ta.style.webkitUserSelect = "text";
-    document.body.appendChild(ta);
-    ta.focus({ preventScroll: true });
-    ta.select();
-    ta.setSelectionRange(0, ta.value.length);
-    const ok = document.execCommand("copy");
-    ta.remove();
-    if (ok) {
-      toast("复制成功");
-      return true;
+    // ========== State ==========
+    let state = {
+      category: 'fc',
+      game: 'ssq',
+      count: 1,
+      results: [], // current session results
+      customItems: [{ game: 'ssq', count: 1 }],
+      theme: 'system', // system | light | dark
+      sound: false,
+      defaultCount: 1,
+      history: [],
+      currentCert: null,
+      drawing: false
+    };
+
+    // ========== Utilities ==========
+    function pad2(n) {
+      return String(n).padStart(2, '0');
     }
-  } catch (_) {}
 
-  // 2. 降级尝试 clipboard API（HTTPS 环境）
-  try {
-    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-      navigator.clipboard.writeText(String(text)).then(() => {
-        toast("复制成功");
-      }).catch(() => {
-        toast("复制失败，请长按结果手动复制");
-      });
-      // 不等待结果，直接返回 true 表示已尝试
-      return true;
+    function formatDateTime(d) {
+      const y = d.getFullYear();
+      const m = pad2(d.getMonth() + 1);
+      const day = pad2(d.getDate());
+      const h = pad2(d.getHours());
+      const mi = pad2(d.getMinutes());
+      const s = pad2(d.getSeconds());
+      return `${y}-${m}-${day} ${h}:${mi}:${s}`;
     }
-  } catch (_) {}
 
-  toast("复制失败，请长按结果手动复制");
-  return false;
-}
+    function formatDateKey(d) {
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
 
-function copyGameResults(gameId,label){
-  const items=pageResults[activePage]||[];
-  const filtered=items.filter(x=>x.gameId===gameId);
-  if(!filtered.length){toast(`暂无${label}结果`);return}
-  copyText(filtered.map(x=>x.result).join("\n"));
-}
+    function formatTime(d) {
+      return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
 
-document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;activePage=b.dataset.page;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===`page-${activePage}`))})
-function updateSecurityUI(){const ok=cryptoAvailable;document.getElementById("topSecureDot").classList.toggle("bad",!ok);document.getElementById("topSecureText").textContent=ok?"Web Crypto 安全随机":"安全随机源不可用";document.querySelectorAll(".security-panel").forEach(x=>x.innerHTML=`<div class="security-title">🔐 随机安全状态</div><div class="security-item">随机源：<strong class="${ok?"security-ok":""}">${ok?"crypto.getRandomValues ✓":"不可用 ✕"}</strong></div><div class="security-item">抽样：<strong>Rejection 采样方式</strong></div><div class="security-item">不重复：<strong>Fisher-Yates</strong></div><div class="security-item">摘要：<strong>SHA-256</strong></div>`)}
-init自定义组合();init今日开奖();updateSecurityUI();if(!cryptoAvailable)setTimeout(()=>toast("当前浏览器不支持 Web Crypto，号码生成已禁用"),600);
+    function todayStr() {
+      return formatDateKey(new Date());
+    }
 
-/* Mobile tactile polish */
-document.addEventListener("click",e=>{const b=e.target.closest("button");if(b&&navigator.vibrate){try{navigator.vibrate(b.classList.contains("btn-primary")?[8,18,8]:6)}catch(_){}}});
+    // ========== Secure Random ==========
+    function getRandomBytes(n) {
+      const arr = new Uint8Array(n);
+      crypto.getRandomValues(arr);
+      return arr;
+    }
 
-/* 3.0 mobile UX: gently reveal newly generated results */
-(function(){
-  const observer = new MutationObserver(function(mutations){
-    for(const m of mutations){
-      if(m.addedNodes && m.addedNodes.length){
-        const node=[...m.addedNodes].find(n=>n.nodeType===1 && n.classList && (n.classList.contains('result-card')||n.classList.contains('results')));
-        if(node && window.innerWidth<700){
-          setTimeout(()=>node.scrollIntoView({behavior:'smooth',block:'center'}),120);
-          break;
+    // Unbiased random int in [0, max) using rejection sampling
+    function randomInt(max) {
+      if (max <= 0) throw new Error('max must be positive');
+      if (max === 1) return 0;
+      // Find next power of 2
+      let limit = 1;
+      while (limit < max) limit <<= 1;
+      const mask = limit - 1;
+      let bytesNeeded = 1;
+      if (limit > 256) bytesNeeded = 2;
+      if (limit > 65536) bytesNeeded = 4;
+
+      while (true) {
+        const bytes = getRandomBytes(bytesNeeded);
+        let val = 0;
+        for (let i = 0; i < bytesNeeded; i++) {
+          val = (val << 8) | bytes[i];
         }
+        val = val & mask;
+        if (val < max) return val;
       }
     }
-  });
-  observer.observe(document.body,{childList:true,subtree:true});
-})();
 
+    // Sample r distinct numbers from [min, max] inclusive, sorted
+    function sampleDistinct(min, max, r) {
+      const n = max - min + 1;
+      if (r > n) throw new Error('r > n');
+      const pool = [];
+      for (let i = min; i <= max; i++) pool.push(i);
+      // Fisher-Yates with secure random
+      for (let i = n - 1; i > 0; i--) {
+        const j = randomInt(i + 1);
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const selected = pool.slice(0, r).sort((a, b) => a - b);
+      return selected;
+    }
 
-/* 4.0 好运文案：克制、随机、仅作为情绪点缀 */
-(function(){
- const lines=[
-  "愿今天有一点好运。",
-  "这一注，交给随机。",
-  "愿这组数字，恰好合你心意。",
-  "好运不必解释。",
-  "愿每一次随机，都有一点好运。"
- ];
- let i=0;
- function setLuck(){
-   const el=document.querySelector(".luck-line");
-   if(!el)return;
-   el.style.opacity="0";
-   setTimeout(()=>{el.textContent=lines[i++%lines.length];el.style.opacity="1"},180);
- }
- const el=document.querySelector(".luck-line");
- if(el){
-   el.style.transition="opacity .22s ease";
-   setLuck();
-   setInterval(setLuck,6500);
- }
-})();
-</script>
+    // Sample digits (with replacement) of given length
+    function sampleDigits(length) {
+      const digits = [];
+      for (let i = 0; i < length; i++) {
+        digits.push(randomInt(10));
+      }
+      return digits;
+    }
+
+    // Collect raw random bytes for audit (approx)
+    function collectRawBytes(byteCount) {
+      return Array.from(getRandomBytes(byteCount));
+    }
+
+    // ========== Certificate & Hash ==========
+    async function sha256(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function generateCertId(gameCode) {
+      const d = new Date();
+      const datePart = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}`;
+      const randBytes = getRandomBytes(3);
+      const randPart = Array.from(randBytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      return `LL-${gameCode}-${datePart}-${randPart}`;
+    }
+
+    function formatNumbers(game, result) {
+      if (game.type === 'digits') {
+        return result.digits.join('');
+      }
+      if (game.id === 'ssq') {
+        return result.red.map(pad2).join(' ') + ' + ' + pad2(result.blue[0]);
+      }
+      if (game.id === 'dlt') {
+        return result.front.map(pad2).join(' ') + ' + ' + result.back.map(pad2).join(' ');
+      }
+      return '';
+    }
+
+    function formatCopyLine(game, result, index) {
+      const num = formatNumbers(game, result);
+      if (index != null) {
+        return `${pad2(index + 1)}. ${num}`;
+      }
+      return `${game.name}：${num}`;
+    }
+
+    // ========== Generate one ticket ==========
+    async function generateOne(gameId) {
+      const game = GAMES[gameId];
+      const generatedAt = new Date();
+      const certId = generateCertId(game.code);
+      const rawBytes = collectRawBytes(32);
+      let result = {};
+      let samplingAlgorithm = 'Rejection Sampling + Fisher-Yates';
+
+      if (game.type === 'balls') {
+        if (game.id === 'ssq') {
+          result.red = sampleDistinct(game.red.min, game.red.max, game.red.count);
+          result.blue = sampleDistinct(game.blue.min, game.blue.max, game.blue.count);
+        } else if (game.id === 'dlt') {
+          result.front = sampleDistinct(game.front.min, game.front.max, game.front.count);
+          result.back = sampleDistinct(game.back.min, game.back.max, game.back.count);
+        }
+      } else {
+        result.digits = sampleDigits(game.length);
+        samplingAlgorithm = 'Rejection Sampling (uniform digits)';
+      }
+
+      const numbersStr = formatNumbers(game, result);
+      const payload = {
+        randomSource: 'crypto.getRandomValues',
+        samplingAlgorithm,
+        randomByteCount: rawBytes.length,
+        rawRandomBytes: rawBytes.map(b => b.toString(16).padStart(2, '0')).join(''),
+        generatedAt: generatedAt.toISOString(),
+        game: game.name,
+        gameId: game.id,
+        certificateId: certId,
+        numbers: numbersStr,
+        version: VERSION
+      };
+
+      const hashInput = JSON.stringify(payload);
+      const hash = await sha256(hashInput);
+
+      return {
+        gameId: game.id,
+        gameName: game.name,
+        category: game.category,
+        result,
+        numbersStr,
+        cert: {
+          ...payload,
+          sha256: hash
+        },
+        generatedAt
+      };
+    }
+
+    // ========== Generate multiple ==========
+    async function generateTickets(gameId, count) {
+      const tickets = [];
+      for (let i = 0; i < count; i++) {
+        tickets.push(await generateOne(gameId));
+      }
+      return tickets;
+    }
+
+    // ========== Audio (optional, lightweight) ==========
+    let audioCtx = null;
+
+    function playTone(freq, duration, type = 'sine', volume = 0.08) {
+      if (!state.sound) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.value = volume;
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) { /* ignore */ }
+    }
+
+    function playStartSound() {
+      playTone(440, 0.08, 'sine', 0.06);
+      setTimeout(() => playTone(554, 0.08, 'sine', 0.05), 80);
+    }
+
+    function playDoneSound() {
+      playTone(523, 0.1, 'sine', 0.07);
+      setTimeout(() => playTone(659, 0.12, 'sine', 0.06), 100);
+      setTimeout(() => playTone(784, 0.15, 'sine', 0.05), 200);
+    }
+
+    // ========== Storage ==========
+    function loadStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.theme) state.theme = data.theme;
+        if (typeof data.sound === 'boolean') state.sound = data.sound;
+        if (data.defaultCount >= 1 && data.defaultCount <= 5) {
+          state.defaultCount = data.defaultCount;
+          state.count = data.defaultCount;
+        }
+        if (Array.isArray(data.history)) state.history = data.history;
+      } catch (e) { /* ignore */ }
+    }
+
+    function saveStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          theme: state.theme,
+          sound: state.sound,
+          defaultCount: state.defaultCount,
+          history: state.history.slice(0, HISTORY_MAX)
+        }));
+      } catch (e) { /* ignore */ }
+    }
+
+    function addToHistory(tickets) {
+      const entry = {
+        id: 'H' + Date.now() + Math.random().toString(36).slice(2, 6),
+        time: new Date().toISOString(),
+        tickets: tickets.map(t => ({
+          gameId: t.gameId,
+          gameName: t.gameName,
+          category: t.category,
+          numbersStr: t.numbersStr,
+          result: t.result,
+          cert: t.cert,
+          generatedAt: t.generatedAt instanceof Date ? t.generatedAt.toISOString() : t.generatedAt
+        }))
+      };
+      state.history.unshift(entry);
+      if (state.history.length > HISTORY_MAX) state.history = state.history.slice(0, HISTORY_MAX);
+      saveStorage();
+    }
+
+    // ========== Theme ==========
+    function applyTheme() {
+      let effective = state.theme;
+      if (effective === 'system') {
+        effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', effective);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = effective === 'dark' ? '#0D1013' : '#F7F3ED';
+
+      // Update theme icon
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        if (effective === 'dark') {
+          icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        } else {
+          icon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        }
+      }
+
+      // Update settings theme opts
+      document.querySelectorAll('.theme-opt').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeOpt === state.theme);
+      });
+    }
+
+    // ========== Clipboard ==========
+    async function copyText(text) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (e) { /* fallback */ }
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // ========== Share ==========
+    async function shareContent(title, text) {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title, text });
+          return true;
+        } catch (e) {
+          if (e.name === 'AbortError') return true;
+        }
+      }
+      const ok = await copyText(text);
+      if (ok) showToast('✓ 已复制到剪贴板');
+      else showToast('复制失败，请手动复制');
+      return ok;
+    }
+
+    // ========== Toast ==========
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('visible'), 1800);
+    }
+
+    // ========== UI: Game tabs ==========
+    function updateGameTabs() {
+      const tabs = document.getElementById('gameTabs');
+      const countSec = document.getElementById('countSection');
+      const drawArea = document.getElementById('drawArea');
+      const customPanel = document.getElementById('customPanel');
+
+      if (state.category === 'custom') {
+        tabs.style.display = 'none';
+        countSec.style.display = 'none';
+        drawArea.style.display = 'none';
+        customPanel.classList.add('visible');
+        renderCustomItems();
+        return;
+      }
+
+      tabs.style.display = 'flex';
+      countSec.style.display = 'flex';
+      drawArea.style.display = 'flex';
+      customPanel.classList.remove('visible');
+
+      const games = state.category === 'fc' ? ['ssq', '3d'] : ['dlt', 'pl5'];
+      tabs.innerHTML = games.map(g => {
+        const active = state.game === g ? 'active' : '';
+        return `<button class="game-btn ${active}" data-game="${g}">${GAMES[g].name}</button>`;
+      }).join('');
+
+      tabs.querySelectorAll('.game-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.game = btn.dataset.game;
+          updateGameTabs();
+          updateDrawArea();
+          // clear preview
+          document.getElementById('ballsContainer').innerHTML = '<p class="placeholder-text">点击下方按钮开始摇奖</p>';
+          document.getElementById('drawNote').textContent = '准备就绪';
+        });
+      });
+
+      // Ensure current game is valid for category
+      if (!games.includes(state.game)) {
+        state.game = games[0];
+      }
+      updateDrawArea();
+    }
+
+    function updateDrawArea() {
+      const game = GAMES[state.game];
+      document.getElementById('drawGameName').textContent = game.name;
+    }
+
+    // ========== Custom items ==========
+    function renderCustomItems() {
+      const container = document.getElementById('customItems');
+      container.innerHTML = state.customItems.map((item, idx) => {
+        const opts = GAME_LIST.map(g =>
+          `<option value="${g}" ${item.game === g ? 'selected' : ''}>${GAMES[g].name}</option>`
+        ).join('');
+        const countOpts = [1,2,3,4,5].map(c =>
+          `<option value="${c}" ${item.count === c ? 'selected' : ''}>${c}注</option>`
+        ).join('');
+        return `
+          <div class="custom-item" data-idx="${idx}">
+            <select class="game-select" aria-label="玩法">${opts}</select>
+            <select class="count-select" aria-label="数量">${countOpts}</select>
+            <button class="remove-btn" aria-label="删除" ${state.customItems.length <= 1 ? 'disabled style="opacity:0.3"' : ''}>×</button>
+          </div>`;
+      }).join('');
+
+      container.querySelectorAll('.custom-item').forEach(row => {
+        const idx = +row.dataset.idx;
+        row.querySelector('.game-select').addEventListener('change', e => {
+          state.customItems[idx].game = e.target.value;
+        });
+        row.querySelector('.count-select').addEventListener('change', e => {
+          state.customItems[idx].count = +e.target.value;
+        });
+        row.querySelector('.remove-btn').addEventListener('click', () => {
+          if (state.customItems.length <= 1) return;
+          state.customItems.splice(idx, 1);
+          renderCustomItems();
+        });
+      });
+    }
+
+    // ========== Render results ==========
+    function renderBallsHTML(ticket, size = 'normal') {
+      const game = GAMES[ticket.gameId];
+      const ballClass = size === 'small' ? 'result-numbers' : 'balls-row';
+      if (game.type === 'digits') {
+        return `<div class="${ballClass}">${ticket.result.digits.map(d =>
+          `<div class="digit-card">${d}</div>`
+        ).join('')}</div>`;
+      }
+      if (game.id === 'ssq') {
+        const reds = ticket.result.red.map(n => `<div class="ball red">${pad2(n)}</div>`).join('');
+        const blue = `<div class="ball blue">${pad2(ticket.result.blue[0])}</div>`;
+        return `<div class="${ballClass}">${reds}<span class="plus-sign">+</span>${blue}</div>`;
+      }
+      if (game.id === 'dlt') {
+        const front = ticket.result.front.map(n => `<div class="ball red">${pad2(n)}</div>`).join('');
+        const back = ticket.result.back.map(n => `<div class="ball blue">${pad2(n)}</div>`).join('');
+        return `<div class="${ballClass}">${front}<span class="plus-sign">+</span>${back}</div>`;
+      }
+      return '';
+    }
+
+    function renderResults() {
+      const section = document.getElementById('resultsSection');
+      const list = document.getElementById('resultsList');
+      if (!state.results.length) {
+        section.classList.remove('visible');
+        return;
+      }
+      section.classList.add('visible');
+
+      list.innerHTML = state.results.map((ticket, idx) => {
+        const noteLabel = state.results.length > 1 ? `第 ${pad2(idx + 1)} 注` : '';
+        return `
+          <div class="result-card" data-idx="${idx}">
+            <div class="result-card-header">
+              <span class="result-game">${ticket.gameName}</span>
+              <span class="result-note">${noteLabel}</span>
+            </div>
+            ${renderBallsHTML(ticket, 'small')}
+            <div class="result-badges">
+              <span class="badge">Secure Random</span>
+              <span class="badge">Verified</span>
+            </div>
+            <div class="result-ops">
+              <button class="op-btn" data-action="copy" data-idx="${idx}">复制</button>
+              <button class="op-btn" data-action="cert" data-idx="${idx}">凭证</button>
+              <button class="op-btn" data-action="share" data-idx="${idx}">分享</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      list.querySelectorAll('.op-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = +btn.dataset.idx;
+          const action = btn.dataset.action;
+          const ticket = state.results[idx];
+          if (action === 'copy') handleCopyTicket(ticket);
+          else if (action === 'cert') openCert(ticket);
+          else if (action === 'share') handleShareTicket(ticket);
+        });
+      });
+
+      // Animate balls
+      list.querySelectorAll('.ball, .digit-card').forEach((el, i) => {
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.classList.add('pop');
+        }, i * 40);
+      });
+    }
+
+    // ========== Progress animation ==========
+    function runProgress(steps, totalMs) {
+      return new Promise(resolve => {
+        const el = document.getElementById('progressSteps');
+        el.innerHTML = steps.map(s => `<div class="step">${s}</div>`).join('');
+        el.classList.add('visible');
+        const stepEls = el.querySelectorAll('.step');
+        const interval = totalMs / steps.length;
+        let i = 0;
+        function next() {
+          if (i > 0) stepEls[i - 1].classList.add('done');
+          if (i < stepEls.length) {
+            stepEls[i].classList.add('show');
+            i++;
+            setTimeout(next, interval);
+          } else {
+            setTimeout(() => {
+              el.classList.remove('visible');
+              el.innerHTML = '';
+              resolve();
+            }, 200);
+          }
+        }
+        next();
+      });
+    }
+
+    // ========== Draw ==========
+    async function doDraw(gameId, count) {
+      if (state.drawing) return;
+      state.drawing = true;
+      const btn = document.getElementById('drawBtn');
+      const customBtn = document.getElementById('customDrawBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      if (customBtn) { customBtn.classList.add('loading'); customBtn.disabled = true; }
+
+      playStartSound();
+
+      const steps = [
+        '随机熵采集中…',
+        '安全随机生成…',
+        '号码整理中…',
+        '随机凭证生成…',
+        'SHA-256…',
+        '✓ 完成'
+      ];
+
+      // Start generation in parallel with animation
+      const genPromise = generateTickets(gameId, count);
+      await runProgress(steps, 900);
+      const tickets = await genPromise;
+
+      playDoneSound();
+
+      state.results = tickets;
+      addToHistory(tickets);
+
+      // Show first ticket in draw area
+      const container = document.getElementById('ballsContainer');
+      document.getElementById('drawNote').textContent = count > 1 ? `已生成 ${count} 注` : '第 01 注';
+      container.innerHTML = renderBallsHTML(tickets[0]);
+      container.querySelectorAll('.ball, .digit-card').forEach((el, i) => {
+        el.classList.add('pop');
+        el.style.animationDelay = `${i * 50}ms`;
+      });
+
+      renderResults();
+      showToast(`✓ 已生成 ${count} 注`);
+
+      state.drawing = false;
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      if (customBtn) { customBtn.classList.remove('loading'); customBtn.disabled = false; }
+    }
+
+    async function doCustomDraw() {
+      if (state.drawing) return;
+      state.drawing = true;
+      const customBtn = document.getElementById('customDrawBtn');
+      customBtn.classList.add('loading');
+      customBtn.disabled = true;
+
+      playStartSound();
+      const steps = [
+        '随机熵采集中…',
+        '安全随机生成…',
+        '号码整理中…',
+        '随机凭证生成…',
+        'SHA-256…',
+        '✓ 完成'
+      ];
+
+      // Switch to show progress in custom panel area - use a temp progress
+      const progressEl = document.createElement('div');
+      progressEl.className = 'progress-steps visible';
+      progressEl.style.marginTop = '12px';
+      customBtn.parentNode.insertBefore(progressEl, customBtn.nextSibling);
+
+      const allTickets = [];
+      const genPromise = (async () => {
+        for (const item of state.customItems) {
+          const tickets = await generateTickets(item.game, item.count);
+          allTickets.push(...tickets);
+        }
+        return allTickets;
+      })();
+
+      // Animate steps
+      progressEl.innerHTML = steps.map(s => `<div class="step">${s}</div>`).join('');
+      const stepEls = progressEl.querySelectorAll('.step');
+      const interval = 900 / steps.length;
+      await new Promise(resolve => {
+        let i = 0;
+        function next() {
+          if (i > 0) stepEls[i - 1].classList.add('done');
+          if (i < stepEls.length) {
+            stepEls[i].classList.add('show');
+            i++;
+            setTimeout(next, interval);
+          } else {
+            setTimeout(resolve, 200);
+          }
+        }
+        next();
+      });
+
+      const tickets = await genPromise;
+      progressEl.remove();
+
+      playDoneSound();
+      state.results = tickets;
+      addToHistory(tickets);
+      renderResults();
+      showToast(`✓ 已生成 ${tickets.length} 注`);
+
+      // Scroll to results
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      state.drawing = false;
+      customBtn.classList.remove('loading');
+      customBtn.disabled = false;
+    }
+
+    // ========== Copy handlers ==========
+    function handleCopyTicket(ticket) {
+      const text = formatCopyLine(GAMES[ticket.gameId], ticket.result);
+      copyText(text).then(ok => {
+        showToast(ok ? '✓ 已复制' : '复制失败，请手动复制');
+      });
+    }
+
+    function buildGroupCopy(category) {
+      const filtered = state.results.filter(t => t.category === category);
+      if (!filtered.length) return null;
+      const title = category === 'fc' ? '【福彩结果】' : '【体彩结果】';
+      const groups = {};
+      filtered.forEach(t => {
+        if (!groups[t.gameId]) groups[t.gameId] = [];
+        groups[t.gameId].push(t);
+      });
+      let lines = [title, ''];
+      Object.keys(groups).forEach(gid => {
+        const game = GAMES[gid];
+        lines.push(game.name);
+        groups[gid].forEach((t, i) => {
+          lines.push(formatCopyLine(game, t.result, i));
+        });
+        lines.push('');
+      });
+      lines.push('— Lottery Lab');
+      lines.push('仅供演示与娱乐');
+      return lines.join('\n');
+    }
+
+    function handleCopyAll() {
+      if (!state.results.length) return;
+      const fc = buildGroupCopy('fc');
+      const tc = buildGroupCopy('tc');
+      let text = '';
+      if (fc) text += fc + '\n\n';
+      if (tc) text += tc;
+      text = text.trim() || state.results.map(t => formatCopyLine(GAMES[t.gameId], t.result)).join('\n');
+      copyText(text).then(ok => showToast(ok ? '✓ 已复制' : '复制失败，请手动复制'));
+    }
+
+    function handleCopyFc() {
+      const text = buildGroupCopy('fc');
+      if (!text) { showToast('当前无福彩结果'); return; }
+      copyText(text).then(ok => showToast(ok ? '✓ 已复制福彩' : '复制失败，请手动复制'));
+    }
+
+    function handleCopyTc() {
+      const text = buildGroupCopy('tc');
+      if (!text) { showToast('当前无体彩结果'); return; }
+      copyText(text).then(ok => showToast(ok ? '✓ 已复制体彩' : '复制失败，请手动复制'));
+    }
+
+    function handleShareTicket(ticket) {
+      const game = GAMES[ticket.gameId];
+      const text = `Lottery Lab\n${game.name}\n\n${ticket.numbersStr}\n\n仅供演示与娱乐`;
+      shareContent('Lottery Lab', text);
+    }
+
+    // ========== Certificate payload (stable key order for hashing) ==========
+    function buildHashPayload(c) {
+      // Must match the exact key order used at generation time
+      return {
+        randomSource: c.randomSource,
+        samplingAlgorithm: c.samplingAlgorithm,
+        randomByteCount: c.randomByteCount,
+        rawRandomBytes: c.rawRandomBytes,
+        generatedAt: c.generatedAt,
+        game: c.game,
+        gameId: c.gameId,
+        certificateId: c.certificateId,
+        numbers: c.numbers,
+        version: c.version
+      };
+    }
+
+    async function computeCertHash(c) {
+      const payload = buildHashPayload(c);
+      return await sha256(JSON.stringify(payload));
+    }
+
+    async function verifyCertificateData(c) {
+      if (!c || !c.sha256) {
+        return { ok: false, error: '缺少 SHA-256 字段' };
+      }
+      const required = [
+        'randomSource', 'samplingAlgorithm', 'randomByteCount', 'rawRandomBytes',
+        'generatedAt', 'game', 'gameId', 'certificateId', 'numbers', 'version'
+      ];
+      for (const key of required) {
+        if (c[key] === undefined || c[key] === null || c[key] === '') {
+          return { ok: false, error: `缺少字段：${key}` };
+        }
+      }
+      // Normalize types
+      const normalized = {
+        randomSource: String(c.randomSource),
+        samplingAlgorithm: String(c.samplingAlgorithm),
+        randomByteCount: Number(c.randomByteCount),
+        rawRandomBytes: String(c.rawRandomBytes),
+        generatedAt: String(c.generatedAt),
+        game: String(c.game),
+        gameId: String(c.gameId),
+        certificateId: String(c.certificateId),
+        numbers: String(c.numbers),
+        version: String(c.version),
+        sha256: String(c.sha256).toLowerCase()
+      };
+      if (!Number.isFinite(normalized.randomByteCount)) {
+        return { ok: false, error: 'randomByteCount 不是有效数字' };
+      }
+      if (!/^[0-9a-f]{64}$/i.test(normalized.sha256)) {
+        return { ok: false, error: 'SHA-256 格式无效（应为 64 位十六进制）' };
+      }
+
+      const recomputed = await computeCertHash(normalized);
+      const match = recomputed === normalized.sha256.toLowerCase();
+      return {
+        ok: match,
+        expected: normalized.sha256.toLowerCase(),
+        actual: recomputed,
+        data: normalized,
+        error: match ? null : '哈希不匹配：凭证数据可能被篡改或损坏'
+      };
+    }
+
+    function parseCertFromText(text) {
+      if (!text || !text.trim()) return null;
+      const trimmed = text.trim();
+
+      // 1) Prefer CERT JSON block
+      const jsonBlock = trimmed.match(/---BEGIN CERT JSON---\s*([\s\S]*?)\s*---END CERT JSON---/i);
+      if (jsonBlock) {
+        try {
+          return JSON.parse(jsonBlock[1].trim());
+        } catch (e) {
+          return { __parseError: 'JSON 区块解析失败：' + e.message };
+        }
+      }
+
+      // 2) Whole text is JSON
+      if (trimmed.startsWith('{')) {
+        try {
+          return JSON.parse(trimmed);
+        } catch (e) {
+          return { __parseError: 'JSON 解析失败：' + e.message };
+        }
+      }
+
+      // 3) Human-readable lines
+      const get = (label) => {
+        const re = new RegExp(label + '[：:]\\s*(.+)', 'i');
+        const m = trimmed.match(re);
+        return m ? m[1].trim() : null;
+      };
+      const game = get('玩法');
+      const certificateId = get('凭证 ID') || get('凭证ID') || get('Certificate ID');
+      const generatedAtHuman = get('生成时间');
+      const numbers = get('号码');
+      const randomSource = get('Random Source');
+      const samplingAlgorithm = get('Sampling');
+      const randomByteCount = get('Random Bytes') || get('随机字节');
+      const rawRandomBytes = get('Raw Random Bytes') || get('原始随机字节');
+      const sha256Val = get('SHA-256') || get('SHA256');
+      const version = get('版本') || get('Version');
+      const gameId = get('Game ID') || get('玩法ID') || get('gameId');
+
+      // Convert human time back to ISO if possible
+      let generatedAt = get('generatedAt') || generatedAtHuman;
+      if (generatedAt && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(generatedAt)) {
+        generatedAt = generatedAt.replace(' ', 'T') + '.000Z';
+        // Note: local display time was used; ISO from generation is preferred via JSON
+      }
+
+      if (!sha256Val || !certificateId) {
+        return { __parseError: '无法识别凭证格式。请粘贴完整凭证（含 ---BEGIN CERT JSON--- 区块）' };
+      }
+
+      return {
+        game: game || '',
+        gameId: gameId || '',
+        certificateId,
+        generatedAt: generatedAt || '',
+        numbers: numbers || '',
+        randomSource: randomSource || 'crypto.getRandomValues',
+        samplingAlgorithm: samplingAlgorithm || '',
+        randomByteCount: randomByteCount ? parseInt(String(randomByteCount).replace(/\D/g, ''), 10) : '',
+        rawRandomBytes: rawRandomBytes || '',
+        version: version || '',
+        sha256: sha256Val
+      };
+    }
+
+    // ========== Certificate sheet ==========
+    function openCert(ticket) {
+      state.currentCert = ticket;
+      const c = ticket.cert;
+      const shortHash = c.sha256.slice(0, 8) + '...' + c.sha256.slice(-4);
+      const shortRaw = c.rawRandomBytes
+        ? (c.rawRandomBytes.slice(0, 16) + '...' + c.rawRandomBytes.slice(-8))
+        : '—';
+      const content = document.getElementById('certContent');
+      const statusEl = document.getElementById('certLiveStatus');
+      statusEl.className = 'cert-verify-status';
+      statusEl.textContent = '';
+      content.innerHTML = `
+        <div class="cert-row">
+          <span class="cert-label">玩法</span>
+          <span class="cert-value">${c.game} <span style="color:var(--text-muted);font-size:12px;">(${c.gameId})</span></span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">凭证 ID</span>
+          <span class="cert-value mono">${c.certificateId}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">生成时间</span>
+          <span class="cert-value">${formatDateTime(new Date(c.generatedAt))}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">号码</span>
+          <span class="cert-value" style="font-size:16px;font-weight:600;">${c.numbers}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">Random Source</span>
+          <span class="cert-value mono">${c.randomSource}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">Sampling</span>
+          <span class="cert-value">${c.samplingAlgorithm}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">Random Bytes</span>
+          <span class="cert-value">${c.randomByteCount} bytes</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">Raw Random Bytes</span>
+          <span class="cert-value mono cert-hash" id="rawToggle" data-full="${c.rawRandomBytes || ''}" data-short="${shortRaw}">${shortRaw}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">SHA-256</span>
+          <span class="cert-value mono cert-hash" id="hashToggle" data-full="${c.sha256}" data-short="${shortHash}">${shortHash}</span>
+        </div>
+        <div class="cert-row">
+          <span class="cert-label">版本</span>
+          <span class="cert-value">${c.version}</span>
+        </div>
+      `;
+      content.querySelector('#hashToggle').addEventListener('click', function () {
+        this.textContent = this.textContent === this.dataset.short ? this.dataset.full : this.dataset.short;
+      });
+      const rawEl = content.querySelector('#rawToggle');
+      if (rawEl && c.rawRandomBytes) {
+        rawEl.addEventListener('click', function () {
+          this.textContent = this.textContent === this.dataset.short ? this.dataset.full : this.dataset.short;
+        });
+      }
+      openSheet('certSheet');
+      // Auto self-verify in background
+      verifyThisCert(true);
+    }
+
+    async function verifyThisCert(silent) {
+      if (!state.currentCert) return;
+      const statusEl = document.getElementById('certLiveStatus');
+      statusEl.className = 'cert-verify-status visible pending';
+      statusEl.textContent = '正在重新计算 SHA-256…';
+      try {
+        const result = await verifyCertificateData(state.currentCert.cert);
+        if (result.ok) {
+          statusEl.className = 'cert-verify-status visible ok';
+          statusEl.textContent = '✓ 完整性校验通过 · 哈希一致';
+          if (!silent) showToast('✓ 凭证验证通过');
+        } else {
+          statusEl.className = 'cert-verify-status visible fail';
+          statusEl.textContent = '✗ 验证失败：' + (result.error || '哈希不匹配');
+          if (!silent) showToast('✗ 凭证验证失败');
+        }
+      } catch (e) {
+        statusEl.className = 'cert-verify-status visible fail';
+        statusEl.textContent = '✗ 验证出错：' + e.message;
+      }
+    }
+
+    function formatCertText(ticket) {
+      const c = ticket.cert;
+      const exportObj = {
+        ...buildHashPayload(c),
+        sha256: c.sha256
+      };
+      return [
+        '✓ Lottery Lab 随机凭证',
+        '',
+        `玩法：${c.game}`,
+        `Game ID：${c.gameId}`,
+        `凭证 ID：${c.certificateId}`,
+        `生成时间：${formatDateTime(new Date(c.generatedAt))}`,
+        `号码：${c.numbers}`,
+        `Random Source：${c.randomSource}`,
+        `Sampling：${c.samplingAlgorithm}`,
+        `Random Bytes：${c.randomByteCount}`,
+        `Raw Random Bytes：${c.rawRandomBytes}`,
+        `SHA-256：${c.sha256}`,
+        `版本：${c.version}`,
+        '',
+        '---BEGIN CERT JSON---',
+        JSON.stringify(exportObj, null, 2),
+        '---END CERT JSON---',
+        '',
+        '仅供技术演示与娱乐使用 · 可用本应用「验证凭证」校验完整性'
+      ].join('\n');
+    }
+
+    async function runVerifyFromInput() {
+      const input = document.getElementById('verifyInput').value;
+      const box = document.getElementById('verifyResultBox');
+      const parsed = parseCertFromText(input);
+
+      if (!parsed) {
+        box.className = 'verify-result-box visible fail';
+        box.innerHTML = '<div class="verify-result-title">✗ 无法解析</div><div>请粘贴完整凭证内容</div>';
+        return;
+      }
+      if (parsed.__parseError) {
+        box.className = 'verify-result-box visible fail';
+        box.innerHTML = `<div class="verify-result-title">✗ 解析失败</div><div>${parsed.__parseError}</div>`;
+        return;
+      }
+
+      box.className = 'verify-result-box visible';
+      box.style.border = '1px solid var(--gold-line)';
+      box.style.background = 'var(--gold-soft)';
+      box.innerHTML = '<div class="verify-result-title">验证中…</div>';
+
+      const result = await verifyCertificateData(parsed);
+      if (result.ok) {
+        const d = result.data;
+        box.className = 'verify-result-box visible ok';
+        box.innerHTML = `
+          <div class="verify-result-title">✓ 凭证有效 · 完整性校验通过</div>
+          <div style="margin-bottom:6px;">玩法 <strong>${d.game}</strong> · 号码 <strong>${d.numbers}</strong></div>
+          <div class="verify-result-detail">凭证 ID：${d.certificateId}</div>
+          <div class="verify-result-detail">生成时间：${d.generatedAt}</div>
+          <div class="verify-result-detail">SHA-256：${d.sha256}</div>
+          <div class="verify-result-detail" style="margin-top:6px;color:var(--text-muted);">重新计算的哈希与凭证声明完全一致</div>
+        `;
+        showToast('✓ 凭证验证通过');
+      } else {
+        box.className = 'verify-result-box visible fail';
+        box.innerHTML = `
+          <div class="verify-result-title">✗ 凭证无效</div>
+          <div style="margin-bottom:8px;">${result.error || '哈希不匹配'}</div>
+          ${result.expected ? `<div class="verify-result-detail">声明哈希：${result.expected}</div>` : ''}
+          ${result.actual ? `<div class="verify-result-detail">计算哈希：${result.actual}</div>` : ''}
+        `;
+        showToast('✗ 凭证验证失败');
+      }
+    }
+
+    // ========== Sheets ==========
+    function openSheet(id) {
+      document.querySelectorAll('.sheet').forEach(s => {
+        if (s.id !== id) s.classList.remove('visible');
+      });
+      document.getElementById('overlay').classList.add('visible');
+      document.getElementById(id).classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSheets() {
+      document.getElementById('overlay').classList.remove('visible');
+      document.querySelectorAll('.sheet').forEach(s => s.classList.remove('visible'));
+      document.body.style.overflow = '';
+      state.currentCert = null;
+    }
+
+    // ========== History ==========
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      const clearWrap = document.getElementById('historyClearWrap');
+      if (!state.history.length) {
+        list.innerHTML = '<div class="history-empty">暂无历史记录<br /><span style="font-size:12px;margin-top:8px;display:block;">摇奖后记录将保存在本地</span></div>';
+        clearWrap.style.display = 'none';
+        return;
+      }
+      clearWrap.style.display = 'block';
+
+      const groups = {};
+      const today = todayStr();
+      state.history.forEach(entry => {
+        const d = new Date(entry.time);
+        const key = formatDateKey(d);
+        const label = key === today ? '今天' : key;
+        if (!groups[label]) groups[label] = [];
+        groups[label].push(entry);
+      });
+
+      let html = '';
+      Object.keys(groups).forEach(label => {
+        html += `<div class="history-group-title">${label}</div>`;
+        groups[label].forEach(entry => {
+          const first = entry.tickets[0];
+          const count = entry.tickets.length;
+          const games = [...new Set(entry.tickets.map(t => t.gameName))].join(' · ');
+          const preview = entry.tickets.slice(0, 2).map(t => t.numbersStr).join(' ｜ ');
+          const time = formatTime(new Date(entry.time));
+          html += `
+            <div class="history-item" data-id="${entry.id}">
+              <div class="history-item-top">
+                <span class="history-item-game">${games}${count > 1 ? ' · ' + count + '注' : ''}</span>
+                <span class="history-item-time">${time}</span>
+              </div>
+              <div class="history-item-preview">${preview}${entry.tickets.length > 2 ? ' …' : ''}</div>
+            </div>`;
+        });
+      });
+      list.innerHTML = html;
+
+      list.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const entry = state.history.find(h => h.id === item.dataset.id);
+          if (!entry) return;
+          // Restore to results
+          state.results = entry.tickets.map(t => ({
+            ...t,
+            generatedAt: new Date(t.generatedAt)
+          }));
+          // Switch to home
+          switchView('home');
+          renderResults();
+          document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+          showToast('✓ 已恢复历史结果');
+        });
+      });
+    }
+
+    function clearHistory() {
+      state.history = [];
+      saveStorage();
+      renderHistory();
+      showToast('✓ 历史已清空');
+    }
+
+    // ========== Views ==========
+    function switchView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + view).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.view === view);
+      });
+      if (view === 'history') renderHistory();
+      if (view === 'settings') {
+        document.getElementById('soundToggle').classList.toggle('on', state.sound);
+        document.getElementById('soundToggle').setAttribute('aria-checked', state.sound);
+        document.getElementById('defaultCountSelect').value = state.defaultCount;
+        applyTheme();
+      }
+      window.scrollTo(0, 0);
+    }
+
+    // ========== Init ==========
+    function init() {
+      loadStorage();
+      applyTheme();
+      updateGameTabs();
+      updateDrawArea();
+
+      // Set count buttons
+      document.querySelectorAll('.count-btn').forEach(btn => {
+        btn.classList.toggle('active', +btn.dataset.count === state.count);
+        btn.addEventListener('click', () => {
+          state.count = +btn.dataset.count;
+          document.querySelectorAll('.count-btn').forEach(b => b.classList.toggle('active', +b.dataset.count === state.count));
+        });
+      });
+
+      // Category tabs
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.category = btn.dataset.cat;
+          document.querySelectorAll('.cat-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.cat === state.category);
+            b.setAttribute('aria-selected', b.dataset.cat === state.category);
+          });
+          if (state.category === 'fc') state.game = 'ssq';
+          else if (state.category === 'tc') state.game = 'dlt';
+          updateGameTabs();
+          document.getElementById('ballsContainer').innerHTML = '<p class="placeholder-text">点击下方按钮开始摇奖</p>';
+          document.getElementById('drawNote').textContent = '准备就绪';
+        });
+      });
+
+      // Draw button
+      document.getElementById('drawBtn').addEventListener('click', () => {
+        doDraw(state.game, state.count);
+      });
+
+      // Custom
+      document.getElementById('addCustomBtn').addEventListener('click', () => {
+        if (state.customItems.length >= 8) {
+          showToast('最多添加 8 组');
+          return;
+        }
+        state.customItems.push({ game: 'ssq', count: 1 });
+        renderCustomItems();
+      });
+
+      document.getElementById('customDrawBtn').addEventListener('click', doCustomDraw);
+
+      // Results actions
+      document.getElementById('copyAllBtn').addEventListener('click', handleCopyAll);
+      document.getElementById('copyFcBtn').addEventListener('click', handleCopyFc);
+      document.getElementById('copyTcBtn').addEventListener('click', handleCopyTc);
+
+      // Theme toggle (quick)
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        const effective = document.documentElement.getAttribute('data-theme');
+        state.theme = effective === 'dark' ? 'light' : 'dark';
+        applyTheme();
+        saveStorage();
+      });
+
+      // Settings button -> settings view
+      document.getElementById('settingsBtn').addEventListener('click', () => switchView('settings'));
+
+      // Nav
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
+      });
+
+      // Overlay close
+      document.getElementById('overlay').addEventListener('click', closeSheets);
+
+      // Cert actions
+      document.getElementById('copyCertBtn').addEventListener('click', () => {
+        if (!state.currentCert) return;
+        copyText(formatCertText(state.currentCert)).then(ok => {
+          showToast(ok ? '✓ 凭证已复制' : '复制失败，请手动复制');
+        });
+      });
+
+      document.getElementById('shareCertBtn').addEventListener('click', () => {
+        if (!state.currentCert) return;
+        const text = formatCertText(state.currentCert);
+        shareContent('Lottery Lab 随机凭证', text);
+      });
+
+      document.getElementById('verifyThisCertBtn').addEventListener('click', () => {
+        verifyThisCert(false);
+      });
+
+      // Verify sheet
+      document.getElementById('openVerifyBtn').addEventListener('click', () => {
+        document.getElementById('verifyInput').value = '';
+        document.getElementById('verifyResultBox').className = 'verify-result-box';
+        document.getElementById('verifyResultBox').innerHTML = '';
+        openSheet('verifySheet');
+      });
+
+      document.getElementById('runVerifyBtn').addEventListener('click', () => {
+        runVerifyFromInput();
+      });
+
+      document.getElementById('clearVerifyBtn').addEventListener('click', () => {
+        document.getElementById('verifyInput').value = '';
+        document.getElementById('verifyResultBox').className = 'verify-result-box';
+        document.getElementById('verifyResultBox').innerHTML = '';
+      });
+
+      // Confirm clear
+      document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+        document.getElementById('confirmMsg').textContent = '确定要清空全部历史记录吗？此操作不可恢复。';
+        openSheet('confirmSheet');
+        document.getElementById('confirmOk').onclick = () => {
+          clearHistory();
+          closeSheets();
+        };
+      });
+
+      document.getElementById('settingsClearHistory').addEventListener('click', () => {
+        document.getElementById('confirmMsg').textContent = '确定要清空全部历史记录吗？此操作不可恢复。';
+        openSheet('confirmSheet');
+        document.getElementById('confirmOk').onclick = () => {
+          clearHistory();
+          closeSheets();
+        };
+      });
+
+      document.getElementById('confirmCancel').addEventListener('click', closeSheets);
+
+      // Sound toggle
+      document.getElementById('soundToggle').addEventListener('click', function () {
+        state.sound = !state.sound;
+        this.classList.toggle('on', state.sound);
+        this.setAttribute('aria-checked', state.sound);
+        saveStorage();
+        if (state.sound) playDoneSound();
+      });
+
+      // Default count
+      document.getElementById('defaultCountSelect').addEventListener('change', function () {
+        state.defaultCount = +this.value;
+        state.count = state.defaultCount;
+        document.querySelectorAll('.count-btn').forEach(b => b.classList.toggle('active', +b.dataset.count === state.count));
+        saveStorage();
+      });
+
+      // Theme options
+      document.querySelectorAll('.theme-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.theme = btn.dataset.themeOpt;
+          applyTheme();
+          saveStorage();
+        });
+      });
+
+      // System theme change
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (state.theme === 'system') applyTheme();
+      });
+
+      // Keyboard: Escape closes sheet
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSheets();
+      });
+    }
+
+    // Boot
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
 </body>
 </html>
