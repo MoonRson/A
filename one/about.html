@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>上传数据到云函数</title>
+</head>
+<body>
+    <h2>数据上传测试</h2>
+    <input type="text" id="userName" placeholder="输入姓名">
+    <button onclick="uploadData()">点击上传</button>
+    <p id="result"></p>
+
+    <script>
+        // 1. 替换成你云函数的公网访问地址（保留 /api/upload）
+        const API_URL = 'https://1257886526-lshb3huv01.ap-guangzhou.tencentscf.com/api/upload';
+
+        async function uploadData() {
+            const name = document.getElementById('userName').value;
+            
+            // 2. 构造要发送的数据（JSON格式）
+            const data = { username: name, time: new Date().toLocaleString() };
+
+            try {
+                // 3. 发送POST请求
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data) // 把数据转成JSON字符串
+                });
+
+                const result = await response.json();
+                // 4. 显示后端返回的结果
+                document.getElementById('result').innerHTML = '✅ ' + JSON.stringify(result);
+            } catch (error) {
+                document.getElementById('result').innerHTML = '❌ 请求失败: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
